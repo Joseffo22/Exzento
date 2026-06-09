@@ -1,5 +1,4 @@
 <?php
-echo "Hola";
 
 // index.php
 require('header.php');
