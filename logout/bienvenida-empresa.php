@@ -111,16 +111,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bienvenida - FactyFlow</title>
+    <title>Bienvenida - Exzento</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
       
         
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #2563EB;
             min-height: 100vh;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            font-weight: 700;
             display: flex;
             flex-direction: column;
         }
@@ -139,8 +140,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         
         .hero-section {
-            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-            color: white;
+            background: #000000;
+            color: #FFFFFF;
             border-radius: 20px 20px 0 0;
             padding: 3rem 2rem;
             text-align: center;
@@ -167,16 +168,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         .feature-icon {
             font-size: 2.5rem;
-            color: #11998e;
+            color: #2563EB;
             margin-bottom: 1rem;
         }
         
         .ticket-info {
-            background: #f8f9fa;
+            background: #FFFFFF;
             border-radius: 15px;
             padding: 2rem;
             margin: 2rem 0;
-            border-left: 5px solid #11998e;
+            border-left: 5px solid #2563EB;
         }
         
         .register-form {
@@ -187,17 +188,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         
         .btn-primary {
-            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            background: #2563EB;
             border: none;
             border-radius: 25px;
             padding: 12px 30px;
-            font-weight: 600;
+            font-weight: 700;
             transition: all 0.3s ease;
         }
         
         .btn-primary:hover {
+            background: #1D4ED8;
             transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(17, 153, 142, 0.3);
+            box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3);
         }
         
         .form-control {
@@ -208,8 +210,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         
         .form-control:focus {
-            border-color: #11998e;
-            box-shadow: 0 0 0 0.2rem rgba(17, 153, 142, 0.25);
+            border-color: #2563EB;
+            box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.25);
         }
         
         @keyframes pulse {
@@ -219,8 +221,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         
         .stats-section {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background: #2563EB;
+            color: #FFFFFF;
             border-radius: 15px;
             padding: 2rem;
             margin: 2rem 0;
@@ -254,7 +256,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="hero-icon">
                     <i class="fas fa-building"></i>
                 </div>
-                <h1 class="display-4 fw-bold mb-3">¡Bienvenida a FactyFlow!</h1>
+                <h1 class="display-4 fw-bold mb-3">¡Bienvenida a Exzento!</h1>
                 <p class="lead mb-0">Has subido exitosamente una factura. Ahora descubre cómo podemos ayudarte a centralizar y gestionar todas tus facturas de manera eficiente.</p>
             </div>
             
@@ -283,7 +285,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="stats-section">
                     <h3 class="text-center mb-4">
                         <i class="fas fa-chart-line me-2"></i>
-                        FactyFlow en Números
+                        Exzento en Números
                     </h3>
                     <div class="row">
                         <div class="col-md-3">
@@ -398,7 +400,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         Crea tu Cuenta Gratuita
                     </h3>
                     <p class="text-center text-muted mb-4">
-                        Únete a miles de empresas que ya confían en FactyFlow para gestionar sus facturas
+                        Únete a miles de empresas que ya confían en Exzento para gestionar sus facturas
                     </p>
                     
                     <form method="POST" class="needs-validation" novalidate>

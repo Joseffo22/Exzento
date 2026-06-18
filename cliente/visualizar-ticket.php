@@ -123,7 +123,7 @@ $conn->close();
             <div class="col-md-8">
                 <!-- 1. DATOS PARA FACTURACIÓN -->
                 <div class="card shadow-sm mb-4" style="border-radius: 15px; border: none;">
-                    <div class="card-header bg-primary text-white" style="border-radius: 15px 15px 0 0; background: linear-gradient(135deg, #6f42c1, #007bff);">
+                    <div class="card-header bg-primary text-white" style="border-radius: 15px 15px 0 0; background: #2563EB;">
                         <h3 class="mb-0 text-center">DATOS PARA FACTURACIÓN</h3>
                     </div>
                     <div class="card-body">
@@ -145,7 +145,7 @@ $conn->close();
                         <div class="row g-3 mb-4">
                             <!-- Copiar todos los datos -->
                             <div class="col-12">
-                                <button onclick="copiarTodo()" class="btn btn-outline-primary w-100" style="border: 2px solid #007bff; background-color: #f8f9fa; border-radius: 10px;">
+                                <button onclick="copiarTodo()" class="btn btn-outline-primary w-100" style="border: 2px solid #2563EB; background-color: #f8f9fa; border-radius: 10px;">
                                     <i class="bi bi-clipboard me-2"></i>Copiar todos los datos
                                 </button>
                             </div>
@@ -356,7 +356,7 @@ $conn->close();
                                 <input class="form-control" type="file" id="archivo_xml" name="archivo_xml" accept=".xml" required>
                             </div>
 
-                            <button type="submit" class="btn btn-primary w-100" style="background: linear-gradient(135deg, #6f42c1, #007bff); border: none; border-radius: 10px;">
+                            <button type="submit" class="btn btn-primary w-100" style="background: #2563EB; border: none; border-radius: 10px;">
                                 <i class="bi bi-upload me-2"></i>Subir archivos
                             </button>
                         </form>
@@ -407,7 +407,7 @@ $conn->close();
         border: 1px solid #dee2e6;
     }
     .form-control:focus {
-        border-color: #6f42c1;
+        border-color: #2563EB;
         box-shadow: 0 0 0 0.2rem rgba(111, 66, 193, 0.25);
     }
     .input-group-text {

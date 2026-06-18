@@ -3,6 +3,6 @@
 ?>
 <footer class="footer text-white text-center py-3 mt-5">
   <div class="container">
-    <small>&copy; <?php echo date('Y'); ?> Facty - Empresa</small>
+    <small>&copy; <?php echo date('Y'); ?> Exzento - Empresa</small>
   </div>
 </footer>

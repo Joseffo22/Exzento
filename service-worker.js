@@ -1,4 +1,4 @@
-const CACHE_NAME = 'factyflow-cache-v1';
+const CACHE_NAME = 'exzento-cache-v1';
 const urlsToCache = [
   '/',
   '/index.php',

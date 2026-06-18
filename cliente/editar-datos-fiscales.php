@@ -52,16 +52,17 @@ $usos = $conn->query($query_usos);
             box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
         }
         .card-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background: #2563EB;
+            color: #FFFFFF;
             border: none;
         }
         .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #2563EB;
             border: none;
+            font-weight: 700;
         }
         .btn-primary:hover {
-            background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+            background: #1D4ED8;
         }
     </style>
 </head>

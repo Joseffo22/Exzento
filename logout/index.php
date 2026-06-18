@@ -1,32 +1,34 @@
 <head>
     <meta charset="UTF-8">
-    <title>FactyFlow - Compartir Tickets y Recibir Facturas</title>
+    <title>Exzento - Compartir Tickets y Recibir Facturas</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
-            --primary-purple: #6f42c1;
-            --secondary-purple: #8e44ad;
-            --light-purple: #e8d5ff;
-            --dark-purple: #4a148c;
+            --exzento-blue: #2563EB;
+            --exzento-black: #000000;
+            --exzento-white: #FFFFFF;
+            --bs-primary-dark: #1D4ED8;
         }
         
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f8f9fa;
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            font-weight: 700;
+            background-color: var(--exzento-white);
+            color: var(--exzento-black);
             margin: 0;
             padding: 0;
         }
         
         .header {
-            background: linear-gradient(135deg, var(--primary-purple), var(--secondary-purple));
-            color: white;
+            background: var(--exzento-blue);
+            color: var(--exzento-white);
             padding: 1rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 2px 10px rgba(111, 66, 193, 0.3);
+            box-shadow: 0 2px 10px rgba(37, 99, 235, 0.3);
         }
         
         .header .logo {
@@ -55,13 +57,13 @@
         }
         
         .top-actions .register-link {
-            color: var(--primary-purple);
+            color: var(--exzento-blue);
             text-decoration: underline;
             font-weight: 500;
         }
         
         .top-actions .login-btn {
-            background: var(--primary-purple);
+            background: var(--exzento-blue);
             color: white;
             border: none;
             padding: 0.5rem 1.5rem;
@@ -72,7 +74,7 @@
         }
         
         .top-actions .login-btn:hover {
-            background: var(--dark-purple);
+            background: var(--bs-primary-dark);
             transform: translateY(-2px);
         }
         
@@ -83,7 +85,7 @@
         }
         
         .hero-section h1 {
-            color: var(--dark-purple);
+            color: var(--exzento-black);
             font-size: 2rem;
             font-weight: bold;
             margin-bottom: 1rem;
@@ -112,7 +114,7 @@
         }
         
         .features-list i {
-            color: var(--primary-purple);
+            color: var(--exzento-blue);
             font-size: 1.2rem;
             width: 20px;
         }
@@ -128,11 +130,11 @@
             padding: 1.5rem;
             margin-bottom: 1.5rem;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            border-left: 4px solid var(--primary-purple);
+            border-left: 4px solid var(--exzento-blue);
         }
         
         .user-type-card h3 {
-            color: var(--primary-purple);
+            color: var(--exzento-blue);
             font-size: 1.3rem;
             font-weight: bold;
             margin-bottom: 1rem;
@@ -154,13 +156,13 @@
         }
         
         .user-type-card i {
-            color: var(--primary-purple);
+            color: var(--exzento-blue);
             font-size: 1rem;
             width: 16px;
         }
         
         .register-btn {
-            background: var(--primary-purple);
+            background: var(--exzento-blue);
             color: white;
             border: none;
             padding: 0.8rem 1.5rem;
@@ -173,7 +175,7 @@
         }
         
         .register-btn:hover {
-            background: var(--dark-purple);
+            background: var(--bs-primary-dark);
             transform: translateY(-2px);
         }
         
@@ -187,15 +189,15 @@
             width: 100%;
             max-width: 400px;
             height: 200px;
-            background: linear-gradient(135deg, var(--light-purple), #d1ecf1);
+            background: #EFF6FF;
             border-radius: 15px;
             display: flex;
             align-items: center;
             justify-content: center;
             margin: 0 auto;
-            color: var(--primary-purple);
+            color: var(--exzento-blue);
             font-size: 3rem;
-            box-shadow: 0 4px 15px rgba(111, 66, 193, 0.2);
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.2);
         }
         
         .search-section {
@@ -205,7 +207,7 @@
         }
         
         .search-section h3 {
-            color: var(--dark-purple);
+            color: var(--exzento-black);
             font-size: 1.2rem;
             margin-bottom: 1rem;
         }
@@ -232,11 +234,11 @@
         }
         
         .search-input:focus {
-            border-color: var(--primary-purple);
+            border-color: var(--exzento-blue);
         }
         
         .search-btn {
-            background: var(--primary-purple);
+            background: var(--exzento-blue);
             color: white;
             border: none;
             padding: 0.8rem 1.5rem;
@@ -248,7 +250,7 @@
         }
         
         .search-btn:hover {
-            background: var(--dark-purple);
+            background: var(--bs-primary-dark);
             transform: translateY(-2px);
         }
         
@@ -278,7 +280,7 @@
 
     <!-- Hero Section -->
     <div class="hero-section">
-        <h1>¿Qué es FactyFlow?</h1>
+        <h1>¿Qué es Exzento?</h1>
         <p>La nueva forma para compartir tickets y recibir facturas, sin complicaciones, en un solo espacio.</p>
         
         <ul class="features-list">

@@ -62,7 +62,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <div class="login-section">
     <div class="login-container">
         <div class="login-header">
-            <i class="fas fa-file-invoice"></i>
+            <img src="/assets/img/logo.jpeg" alt="Exzento" class="login-logo">
             <h2>Bienvenido</h2>
             <p>Ingresa tus credenciales para continuar</p>
         </div>
@@ -73,7 +73,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <i class="fas fa-heart"></i>
             </div>
             <h4>¡Te damos la bienvenida!</h4>
-            <p>Tu cuenta ha sido creada exitosamente. Inicia sesión para comenzar esta increíble historia con FactyFlow.</p>
+            <p>Tu cuenta ha sido creada exitosamente. Inicia sesión para comenzar esta increíble historia con Exzento.</p>
             <div class="welcome-features">
                 <div class="feature-item">
                     <i class="fas fa-check-circle"></i>
@@ -121,13 +121,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <style>
 .welcome-message {
-    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-    color: white;
+    background: #2563EB;
+    color: #FFFFFF;
     border-radius: 15px;
     padding: 25px;
     margin-bottom: 25px;
     text-align: center;
-    box-shadow: 0 10px 30px rgba(17, 153, 142, 0.3);
+    box-shadow: 0 10px 30px rgba(37, 99, 235, 0.3);
     animation: slideInDown 0.6s ease-out;
 }
 

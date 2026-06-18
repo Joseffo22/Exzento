@@ -34,7 +34,7 @@ $estadisticas = obtenerEstadisticasContactos($_SESSION['id_usuario']);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contactos Frecuentes - Facty</title>
+    <title>Contactos Frecuentes - Exzento</title>
 
 </head>
 <body class="bg-light">

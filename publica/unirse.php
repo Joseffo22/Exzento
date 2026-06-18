@@ -117,13 +117,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $invitacion_valida) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Unirse a FactyFlow - Invitación</title>
+    <title>Unirse a Exzento - Invitación</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #2563EB;
             min-height: 100vh;
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            font-weight: 700;
         }
         
         .card {
@@ -133,10 +135,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $invitacion_valida) {
         }
         
         .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #2563EB;
             border: none;
             border-radius: 10px;
             padding: 12px 30px;
+            font-weight: 700;
+        }
+        
+        .btn-primary:hover {
+            background: #1D4ED8;
         }
         
         .form-control {
@@ -146,21 +153,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $invitacion_valida) {
         }
         
         .form-control:focus {
-            border-color: #667eea;
-            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+            border-color: #2563EB;
+            box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.25);
         }
         
         .invitation-banner {
-            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            background: #2563EB;
             color: white;
             border-radius: 10px;
             padding: 20px;
             margin-bottom: 20px;
         }
         
-        .logo {
-            font-size: 2.5rem;
-            color: #667eea;
+        .logo img {
+            height: 56px;
+            width: auto;
         }
         
         .security-notice {
@@ -178,10 +185,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $invitacion_valida) {
             <div class="col-lg-6">
                 <div class="text-center mb-4">
                     <div class="logo">
-                        <i class="fas fa-file-invoice"></i>
+                        <img src="/assets/img/logo.jpeg" alt="Exzento">
                     </div>
-                    <h1 class="text-white mb-0">FactyFlow</h1>
-                    <p class="text-white-50">La mejor plataforma de facturación</p>
+                    <p class="text-white-50 mt-2">La mejor plataforma de facturación</p>
                 </div>
                 
                 <div class="card">
@@ -190,7 +196,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $invitacion_valida) {
                             <!-- Banner de invitación -->
                             <div class="invitation-banner text-center">
                                 <h5><i class="fas fa-gift me-2"></i>¡Has sido invitado!</h5>
-                                <p class="mb-0"><?php echo htmlspecialchars($nombre_invitador); ?> te invita a unirte a FactyFlow</p>
+                                <p class="mb-0"><?php echo htmlspecialchars($nombre_invitador); ?> te invita a unirte a Exzento</p>
                                 <?php if ($mensaje_invitacion): ?>
                                     <div class="mt-3 p-3 bg-white bg-opacity-25 rounded">
                                         <em>"<?php echo htmlspecialchars($mensaje_invitacion); ?>"</em>

@@ -8,7 +8,7 @@
             <div class="col-md-3">
                 <div class="mb-3">
                     <h6 class="text-light mb-2">
-                        <i class="fas fa-file-invoice"></i> FactyFlow
+                        <img src="/assets/img/logo.jpeg" alt="Exzento" class="footer-logo">
                     </h6>
                     <p class="text-muted small">
                         Sistema integral de facturación y gestión de tickets fiscales
@@ -16,7 +16,7 @@
                 </div>
                 <p class="text-muted small">
                     <i class="fas fa-copyright"></i>
-                    <?php echo date('Y'); ?> FactyFlow | Todos los derechos reservados
+                    <?php echo date('Y'); ?> Exzento | Todos los derechos reservados
                 </p>
             </div>
             
@@ -170,7 +170,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <p><i class="fas fa-envelope me-2"></i><strong>Email:</strong> soporte@factyflow.com</p>
+                <p><i class="fas fa-envelope me-2"></i><strong>Email:</strong> soporte@exzento.com</p>
                 <p><i class="fas fa-phone me-2"></i><strong>Teléfono:</strong> +52 (55) 1234-5678</p>
                 <p><i class="fas fa-clock me-2"></i><strong>Horario:</strong> Lunes a Viernes 9:00 - 18:00</p>
                 <p><i class="fas fa-map-marker-alt me-2"></i><strong>Ubicación:</strong> Ciudad de México, México</p>

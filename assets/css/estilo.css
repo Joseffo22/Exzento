@@ -1,8 +1,11 @@
 :root {
-    --bs-primary: #9932cc !important;
-    --bs-primary-rgb: 153, 50, 204 !important;
-    --bs-primary-dark: #800080 !important;
-    --bs-primary-dark-rgb: 128, 0, 128 !important;
+    --exzento-blue: #2563EB;
+    --exzento-black: #000000;
+    --exzento-white: #FFFFFF;
+    --bs-primary: #2563EB !important;
+    --bs-primary-rgb: 37, 99, 235 !important;
+    --bs-primary-dark: #1D4ED8 !important;
+    --bs-primary-dark-rgb: 29, 78, 216 !important;
 }
 
 /* Sobrescribir colores de Bootstrap con mayor especificidad */
@@ -61,7 +64,7 @@
 }
 .nav-link {
     color: rgba(255, 255, 255, 0.9) !important;
-    font-weight: 500;
+    font-weight: 700;
     padding: 0.5rem 1rem !important;
     border-radius: 6px;
     transition: all 0.3s ease;
@@ -96,7 +99,7 @@
 }
 .footer p {
     margin: 0;
-    font-weight: 500;
+    font-weight: 700;
     opacity: 0.9;
 }
 .footer i {

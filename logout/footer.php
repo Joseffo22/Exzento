@@ -1,14 +1,14 @@
 <style>
     .footer {
-        background: var(--bs-primary);
-        color: white;
+        background: #000000;
+        color: #FFFFFF;
         padding: 1.5rem 0;
         margin-top: auto;
-        box-shadow: 0 -2px 10px rgba(var(--bs-primary-rgb), 0.2);
+        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
     }
     .footer p {
         margin: 0;
-        font-weight: 500;
+        font-weight: 700;
         opacity: 0.9;
     }
     .footer i {
@@ -21,7 +21,7 @@
     <div class="container d-flex justify-content-between align-items-center">
         <p>
             <i class="fas fa-copyright"></i>
-            <?php echo date('Y'); ?> FactyFlow | Todos los derechos reservados
+            <?php echo date('Y'); ?> Exzento | Todos los derechos reservados
         </p>
         <button id="installButton" class="btn btn-outline-light btn-sm d-none">
             <i class="fas fa-mobile-alt me-2"></i>Instalar App

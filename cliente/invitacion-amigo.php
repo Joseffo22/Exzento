@@ -7,7 +7,7 @@ require('assets/php/conexiones/conexionMySqli.php');
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Invitar Amigo - FactyFlow</title>
+    <title>Invitar Amigo - Exzento</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 
@@ -48,7 +48,7 @@ require('assets/php/conexiones/conexionMySqli.php');
                                 <h4 class="mb-0">
                                     <i class="fas fa-user-plus me-2"></i>Nueva Invitación
                                 </h4>
-                                <p class="mb-0">Comparte FactyFlow con tus amigos</p>
+                                <p class="mb-0">Comparte Exzento con tus amigos</p>
                             </div>
                             <div class="card-body p-4">
                                 <!-- Formulario de invitación -->
@@ -321,7 +321,7 @@ require('assets/php/conexiones/conexionMySqli.php');
                     const whatsapp = document.getElementById('whatsapp').value;
                     const link = data.link_invitacion;
                     
-                    let textoWhatsApp = `¡Hola! Te invito a unirte a FactyFlow, la mejor plataforma de facturación. ${mensaje}\n\nRegístrate aquí: ${link}`;
+                    let textoWhatsApp = `¡Hola! Te invito a unirte a Exzento, la mejor plataforma de facturación. ${mensaje}\n\nRegístrate aquí: ${link}`;
                     
                     if (whatsapp) {
                         const urlWhatsApp = `https://wa.me/${whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(textoWhatsApp)}`;

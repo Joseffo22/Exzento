@@ -1,4 +1,7 @@
-/* Estilos específicos para el footer - Alta especificidad */
+.footer-logo {
+    height: 28px;
+    width: auto;
+}
 .footer .footer-link,
 .footer a.footer-link,
 .footer .footer-links a {
@@ -15,7 +18,7 @@
 .footer .footer-link:hover,
 .footer a.footer-link:hover,
 .footer .footer-links a:hover {
-    color: #17a2b8 !important;
+    color: rgba(255, 255, 255, 0.85) !important;
     padding-left: 8px !important;
     transform: translateX(5px) !important;
     text-decoration: none !important;
@@ -54,7 +57,7 @@
 
 .footer h6 {
     color: #ffffff !important;
-    font-weight: 600 !important;
+    font-weight: 700 !important;
     margin-bottom: 1rem !important;
 }
 
