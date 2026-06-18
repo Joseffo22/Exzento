@@ -1,6 +1,7 @@
 .footer-logo {
-    height: 24px;
-    width: auto;
+    height: 22px !important;
+    width: auto !important;
+    max-height: 22px !important;
 }
 .footer .footer-link,
 .footer a.footer-link,

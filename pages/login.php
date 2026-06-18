@@ -62,7 +62,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <div class="login-section">
     <div class="login-container">
         <div class="login-header">
-            <img src="/assets/img/logo.png" alt="Exzento" class="login-logo">
+            <img src="/assets/img/logo-dark.svg" alt="Exzento" class="login-logo">
             <h2>Bienvenido</h2>
             <p>Ingresa tus credenciales para continuar</p>
         </div>

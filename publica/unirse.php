@@ -122,10 +122,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $invitacion_valida) {
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         body {
-            background: #2563EB;
+            background: #F9FAFB;
             min-height: 100vh;
-            font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            font-weight: 700;
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
         }
         
         .card {
@@ -185,7 +184,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $invitacion_valida) {
             <div class="col-lg-6">
                 <div class="text-center mb-4">
                     <div class="logo">
-                        <img src="/assets/img/logo-white.png" alt="Exzento">
+                        <img src="/assets/img/logo-dark.svg" alt="Exzento" class="landing-logo" width="160" height="32">
                     </div>
                     <p class="text-white-50 mt-2">La mejor plataforma de facturación</p>
                 </div>

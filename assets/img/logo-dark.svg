@@ -1,9 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 56" role="img" aria-label="Exzento">
-  <text x="0" y="42" fill="#FFFFFF" font-family="Segoe UI, system-ui, -apple-system, sans-serif" font-weight="700" font-size="40">Ex</text>
+  <text x="0" y="42" fill="#000000" font-family="Segoe UI, system-ui, -apple-system, sans-serif" font-weight="700" font-size="40">Ex</text>
   <g transform="translate(62, 4)">
     <path fill="#2563EB" d="M0 10c0-5.5 4.5-10 10-10h30c5.5 0 10 4.5 10 10v32c0 5.5-4.5 10-10 10H10c-5.5 0-10-4.5-10-10V10z"/>
     <path fill="#2563EB" d="M40 0h10c2.8 0 5 2.2 5 5v10c0 2.8-2.2 5-5 5h-10V0z"/>
     <text x="25" y="36" text-anchor="middle" fill="#000000" font-family="Segoe UI, system-ui, sans-serif" font-weight="700" font-size="26">z</text>
   </g>
-  <text x="128" y="42" fill="#FFFFFF" font-family="Segoe UI, system-ui, -apple-system, sans-serif" font-weight="700" font-size="40">ento</text>
+  <text x="128" y="42" fill="#000000" font-family="Segoe UI, system-ui, -apple-system, sans-serif" font-weight="700" font-size="40">ento</text>
 </svg>

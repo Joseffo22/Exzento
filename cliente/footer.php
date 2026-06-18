@@ -8,7 +8,7 @@
             <div class="col-md-3">
                 <div class="mb-3">
                     <h6 class="text-light mb-2">
-                        <img src="/assets/img/logo-white.png" alt="Exzento" class="footer-logo">
+                        <img src="/assets/img/logo.svg" alt="Exzento" class="footer-logo">
                     </h6>
                     <p class="text-muted small">
                         Sistema integral de facturación y gestión de tickets fiscales
@@ -485,4 +485,7 @@ function mostrarProximasFunciones() {
 }
 </script>
 
-
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/assets/js/session-keepalive.js"></script>
+</body>
+</html>

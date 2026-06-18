@@ -11,13 +11,12 @@
 body {
     font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     color: var(--exzento-black);
+    font-weight: 400;
 }
 
 h1, h2, h3, h4, h5, h6,
-.navbar-brand,
 .btn,
-.card-title,
-.nav-link {
+.card-title {
     font-weight: 700;
 }
 
@@ -70,32 +69,41 @@ a:not(.btn):not(.nav-link):hover {
     border-color: var(--bs-primary) !important;
 }
 
-/* Navbar general styles (from logout/nav.php, adapted) */
+/* Navbar */
+.exzento-navbar,
 .navbar {
-    background: var(--exzento-blue);
-    box-shadow: 0 2px 10px rgba(var(--bs-primary-rgb), 0.2);
+    background: var(--exzento-black) !important;
+    box-shadow: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 0.65rem 0;
 }
 .navbar a.navbar-brand {
-    font-weight: 600;
-    font-size: 1.4rem;
-    color: white !important;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.25rem 0;
+    font-weight: 700;
+    padding: 0;
+    margin-right: 1rem;
 }
 .navbar-logo {
-    height: 32px;
-    width: auto;
+    height: 28px !important;
+    width: auto !important;
+    max-height: 28px !important;
     display: block;
 }
-.navbar .navbar-brand i {
-    color: white !important;
-    font-size: 1.6rem;
+.btn-exzento-nav {
+    background: var(--exzento-blue) !important;
+    color: var(--exzento-white) !important;
+    border-radius: 6px;
+    padding: 0.4rem 1rem !important;
+    font-weight: 700;
+    font-size: 0.9rem;
+    border: none;
+}
+.btn-exzento-nav:hover {
+    background: var(--bs-primary-dark) !important;
+    color: var(--exzento-white) !important;
 }
 .nav-link {
-    color: rgba(255, 255, 255, 0.9) !important;
-    font-weight: 700;
+    color: rgba(255, 255, 255, 0.85) !important;
+    font-weight: 500;
     padding: 0.5rem 1rem !important;
     border-radius: 6px;
     transition: all 0.3s ease;
@@ -140,12 +148,12 @@ a:not(.btn):not(.nav-link):hover {
 
 /* Login page specific styles (from pages/login.php) */
 .login-section {
-    min-height: calc(100vh - 200px); /* Ajusta según el alto de tu nav y footer */
+    min-height: calc(100vh - 200px);
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 2rem 1rem;
-    background: var(--exzento-blue);
+    background: #F9FAFB;
 }
 .login-container {
     background: rgba(255, 255, 255, 0.95);
@@ -161,8 +169,9 @@ a:not(.btn):not(.nav-link):hover {
     margin-bottom: 2rem;
 }
 .login-header .login-logo {
-    height: 48px;
+    height: 36px;
     width: auto;
+    max-height: 36px;
     margin-bottom: 1rem;
 }
 .login-header i {
