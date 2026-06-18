@@ -1,0 +1,205 @@
+/* Vista cliente — Datos para facturación */
+.df-page {
+    --df-blue: #2563EB;
+    --df-wa: #25d366;
+    --df-wa-dark: #128c7e;
+    --df-muted: #6b7280;
+    --df-border: #e5e7eb;
+}
+
+.df-page .df-card {
+    border-radius: 15px;
+    border: none;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.08);
+}
+
+.df-page .df-card-header {
+    background: var(--df-blue);
+    border-radius: 15px 15px 0 0;
+    padding: 1rem 1.25rem;
+}
+
+.df-page .df-card-header h1 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    margin: 0;
+    text-align: center;
+    letter-spacing: 0.02em;
+}
+
+.df-intro {
+    background: linear-gradient(135deg, #eff6ff, #f5f3ff);
+    border-radius: 10px;
+    padding: 0.85rem 1rem;
+    font-size: 0.95rem;
+    margin-bottom: 1.25rem;
+    border: none;
+}
+
+.df-whatsapp-block {
+    background: #f9fafb;
+    border: 1px solid var(--df-border);
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.df-dest-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 0.5rem 0;
+    margin-bottom: 0.25rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--df-muted);
+    text-decoration: none;
+    border: none;
+    background: none;
+}
+
+.df-dest-toggle:hover {
+    color: var(--df-blue);
+}
+
+.df-dest-toggle .bi-chevron-down {
+    transition: transform 0.2s ease;
+}
+
+.df-dest-toggle[aria-expanded="true"] .bi-chevron-down {
+    transform: rotate(180deg);
+}
+
+.df-dest-panel {
+    padding-top: 0.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.df-dest-hint {
+    font-size: 0.8rem;
+    color: var(--df-muted);
+    margin-top: 0.35rem;
+}
+
+.df-contacto-seleccionado {
+    font-size: 0.85rem;
+    color: #15803d;
+    margin-top: 0.5rem;
+}
+
+.df-btn-whatsapp {
+    background: linear-gradient(135deg, var(--df-wa), var(--df-wa-dark));
+    border: none;
+    color: #fff;
+    font-weight: 700;
+    font-size: 1.05rem;
+    padding: 0.85rem 1rem;
+    border-radius: 12px;
+    width: 100%;
+}
+
+.df-btn-whatsapp:hover {
+    color: #fff;
+    filter: brightness(1.05);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(37, 211, 102, 0.35);
+}
+
+.df-actions-secondary {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+}
+
+.df-btn-secondary {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 0.65rem 0.75rem;
+    font-weight: 600;
+    font-size: 0.9rem;
+    border-radius: 10px;
+    border: 1px solid var(--df-border);
+    background: #fff;
+    color: #374151;
+}
+
+.df-btn-secondary:hover {
+    background: #f9fafb;
+    border-color: #d1d5db;
+    color: #111827;
+}
+
+.df-collapse-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 0.75rem 1rem;
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: #374151;
+    background: #fff;
+    border: 1px solid var(--df-border);
+    border-radius: 10px;
+    margin-bottom: 0.5rem;
+}
+
+.df-collapse-trigger:hover {
+    background: #f9fafb;
+}
+
+.df-collapse-trigger .bi-chevron-down {
+    transition: transform 0.2s ease;
+    color: var(--df-muted);
+}
+
+.df-collapse-trigger[aria-expanded="true"] .bi-chevron-down {
+    transform: rotate(180deg);
+}
+
+.df-collapse-inner {
+    border: 1px solid var(--df-border);
+    border-radius: 10px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    background: #fff;
+}
+
+.df-collapse-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--df-border);
+}
+
+.df-link-muted {
+    font-size: 0.85rem;
+    color: var(--df-muted);
+    text-decoration: none;
+}
+
+.df-link-muted:hover {
+    color: var(--df-blue);
+    text-decoration: underline;
+}
+
+.df-page .copiable {
+    cursor: pointer;
+    user-select: all;
+    transition: all 0.2s ease;
+    background-color: #f8f9fa;
+    margin-bottom: 0;
+    padding: 0.375rem 0.75rem;
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+}
+
+.df-page .copiable:hover {
+    background-color: #e9ecef;
+}

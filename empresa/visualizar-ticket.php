@@ -1,5 +1,6 @@
 <?php
 require_once('assets/php/conexiones/conexionMySqli.php');
+require_once('funciones/mensaje_whatsapp_factura.php');
 
 $id_ticket = $_GET['id'] ?? null;
 if (!$id_ticket) die("Falta el ID.");
@@ -80,37 +81,7 @@ $datosFacturacion = [
     'Teléfono' => $datos['telefono']
 ];
 
-// Construir el mensaje con todos los datos
-$mensaje = "📋 *Datos para Facturación*\n\n";
-
-// $mensaje .= "Constancia de situacion fiscal: $urlConstancia\n\n";
-
-$mensaje .= "📝 *Datos Fiscales:*\n";
-$mensaje .= "Nombre/Razón Social: {$datosFacturacion['Nombre o Razón Social']}\n";
-$mensaje .= "ID de Ticket: {$datosFacturacion['ID de Ticket']}\n";
-$mensaje .= "Régimen Fiscal: {$datosFacturacion['Régimen Fiscal']}\n";
-$mensaje .= "RFC: {$datosFacturacion['RFC']}\n";
-$mensaje .= "Metodo de Pago: {$datosFacturacion['metodoPago']}\n";
-$mensaje .= "Uso de CFDI: {$datosFacturacion['Uso de CFDI']}\n\n";
-
-$mensaje .= "👤 *Datos de Contacto:*\n";
-
-
-$mensaje .= "Teléfono: {$datosFacturacion['Teléfono']}\n\n";
-
-$mensaje .= "📍 *Dirección Fiscal:*\n";
-$mensaje .= "Calle y Número: {$datosFacturacion['Calle y Número']}\n";
-$mensaje .= "Colonia: {$datosFacturacion['Colonia']}\n";
-$mensaje .= "C.P.: {$datosFacturacion['Código Postal']}\n";
-$mensaje .= "Municipio/Alcaldía: {$datosFacturacion['Municipio/Alcaldía']}\n";
-$mensaje .= "Estado: {$datosFacturacion['Estado']}\n";
-$mensaje .= "País: {$datosFacturacion['País']}\n\n";
-
-$mensaje .= "🔗 *Enlaces:*\n";
-$mensaje .= "Para ver el ticket de compra, puede ingresar a mi espacio, por medio del siguiente enlace:
-:*\n";
-$mensaje .= "Ver Ticket: $urlTicket\n";
-$mensaje .= "⚠️ *Nota:*Por favor, puedes mandar la factura a mi espacio, a través del mismo enlace que compartí anteriormente.";
+$mensaje = construirMensajeWhatsAppFactura($id_ticket, $datos, $urlTicket);
 
 // Cerrar la conexión
 $stmt->close();

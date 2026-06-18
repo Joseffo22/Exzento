@@ -10,7 +10,7 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-require_once('assets/php/conexiones/conexionMySqli.php');
+require_once(__DIR__ . '/../assets/php/conexiones/conexionMySqli.php');
 
 function buscarContactoFrecuente($telefono) {
     global $conn;

@@ -154,7 +154,7 @@ try {
     // Redirigir al usuario con mensaje de éxito
     $_SESSION['mensaje'] = [
         'tipo' => 'success',
-        'texto' => "Ticket generado exitosamente" . ($numeroTicket ? ". Número de ticket: {$numeroTicket}" : "")
+        'texto' => "Ticket #{$idTicket} generado exitosamente"
     ];
     header("Location: generar_qr.php?id={$idTicket}");
     exit;

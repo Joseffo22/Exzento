@@ -1,0 +1,405 @@
+/* Vista comercio — dark mode (mockup) */
+:root {
+    --c-bg: #0d0d0f;
+    --c-card: #1a1a1e;
+    --c-card-border: #2a2a30;
+    --c-text: #ffffff;
+    --c-muted: #8b8b95;
+    --c-green: #3ecf8e;
+    --c-green-dim: #1e3d2f;
+    --c-amber: #c9a227;
+    --c-amber-bg: #3d3520;
+    --c-teal: #5eead4;
+    --c-teal-bg: #1a3330;
+    --c-blue: #2563EB;
+}
+
+.comercio-page {
+    background: var(--c-bg);
+    min-height: 100vh;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    color: var(--c-text);
+}
+
+.comercio-topbar {
+    padding: 1rem 0 0.25rem;
+    text-align: center;
+}
+
+.comercio-topbar img {
+    height: 22px;
+    width: auto;
+    opacity: 0.9;
+}
+
+.comercio-wrap {
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 0.5rem 1rem 3rem;
+}
+
+/* Encabezado */
+.comercio-hero {
+    text-align: center;
+    margin-bottom: 1.25rem;
+    padding-top: 0.5rem;
+}
+
+.comercio-hero h1 {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--c-text);
+    margin: 0 0 0.85rem;
+    line-height: 1.35;
+    letter-spacing: 0.01em;
+}
+
+.comercio-badges {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.comercio-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.35rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 700;
+}
+
+.comercio-badge-pendiente {
+    background: var(--c-amber-bg);
+    color: var(--c-amber);
+}
+
+.comercio-badge-facturado {
+    background: var(--c-green-dim);
+    color: var(--c-green);
+}
+
+.comercio-badge-monto {
+    background: var(--c-teal-bg);
+    color: var(--c-teal);
+}
+
+/* Pasos */
+.comercio-steps {
+    display: flex;
+    background: var(--c-card);
+    border: 1px solid var(--c-card-border);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 1rem;
+}
+
+.comercio-step {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 0.65rem 0.35rem;
+    border-right: 1px solid var(--c-card-border);
+}
+
+.comercio-step:last-child {
+    border-right: none;
+}
+
+.comercio-step-num {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #333338;
+    color: var(--c-muted);
+    font-size: 0.7rem;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.comercio-step.active .comercio-step-num {
+    background: var(--c-green);
+    color: #0d0d0f;
+}
+
+.comercio-step.done .comercio-step-num {
+    background: var(--c-green);
+    color: #0d0d0f;
+}
+
+.comercio-step-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--c-muted);
+    line-height: 1.1;
+}
+
+.comercio-step.active .comercio-step-label {
+    color: var(--c-text);
+}
+
+/* Tarjeta datos fiscales */
+.comercio-section {
+    background: var(--c-card);
+    border: 1px solid var(--c-card-border);
+    border-radius: 14px;
+    padding: 1.1rem 1.15rem;
+    margin-bottom: 0.85rem;
+}
+
+.comercio-section-head {
+    margin-bottom: 1rem;
+}
+
+.comercio-section-head h2 {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--c-text);
+    margin: 0 0 0.2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+}
+
+.comercio-section-head h2 i {
+    color: var(--c-muted);
+    font-size: 0.85rem;
+}
+
+.comercio-section-head p {
+    font-size: 0.75rem;
+    color: var(--c-muted);
+    margin: 0;
+    font-weight: 400;
+}
+
+.comercio-dato-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.55rem 0;
+    border-bottom: 1px solid var(--c-card-border);
+    cursor: pointer;
+}
+
+.comercio-dato-row:last-of-type {
+    border-bottom: none;
+}
+
+.comercio-dato-row label {
+    font-size: 0.78rem;
+    color: var(--c-muted);
+    font-weight: 500;
+    flex-shrink: 0;
+    min-width: 90px;
+    margin: 0;
+    cursor: pointer;
+}
+
+.comercio-dato-row span {
+    font-size: 0.78rem;
+    color: var(--c-text);
+    font-weight: 600;
+    text-align: right;
+    line-height: 1.35;
+    word-break: break-word;
+}
+
+.comercio-dato-row.copied span {
+    color: var(--c-green);
+}
+
+.comercio-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin: 0.85rem 0 0;
+}
+
+.comercio-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    padding: 0.7rem 1rem;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.82rem;
+    text-decoration: none !important;
+    border: none;
+    cursor: pointer;
+    transition: all 0.15s;
+    width: 100%;
+    background: transparent;
+}
+
+.comercio-btn-primary {
+    background: var(--c-blue);
+    color: #fff !important;
+}
+
+.comercio-btn-primary:hover {
+    background: #1d4ed8;
+    color: #fff !important;
+}
+
+.comercio-btn-ghost {
+    background: transparent;
+    border: 1px solid var(--c-card-border);
+    color: var(--c-text) !important;
+}
+
+.comercio-btn-ghost:hover {
+    border-color: var(--c-muted);
+    color: var(--c-text) !important;
+}
+
+.comercio-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.comercio-collapse-toggle {
+    width: 100%;
+    background: transparent;
+    border: 1px solid var(--c-card-border);
+    border-radius: 10px;
+    padding: 0.7rem 1rem;
+    font-weight: 600;
+    font-size: 0.82rem;
+    color: var(--c-text);
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.4rem;
+    cursor: pointer;
+    margin-top: 0.85rem;
+}
+
+.comercio-collapse-toggle:hover {
+    border-color: var(--c-muted);
+}
+
+.comercio-collapse-body {
+    margin-top: 0.75rem;
+    padding-top: 0.5rem;
+}
+
+/* Upload */
+.comercio-upload-zone {
+    border: 1.5px dashed #3a3a42;
+    border-radius: 10px;
+    padding: 1.25rem 1rem;
+    text-align: center;
+    cursor: pointer;
+    background: #141418;
+    margin-bottom: 0.65rem;
+    color: var(--c-muted);
+    font-size: 0.8rem;
+}
+
+.comercio-upload-zone:hover,
+.comercio-upload-zone.dragover {
+    border-color: var(--c-blue);
+    color: var(--c-text);
+}
+
+.comercio-upload-zone.loaded {
+    border-color: var(--c-green);
+    border-style: solid;
+    background: var(--c-green-dim);
+    color: var(--c-green);
+}
+
+.comercio-upload-zone i {
+    font-size: 1.5rem;
+    display: block;
+    margin-bottom: 0.4rem;
+}
+
+.comercio-upload-zone .file-name {
+    font-weight: 600;
+    font-size: 0.78rem;
+    margin-top: 0.3rem;
+    color: var(--c-green);
+}
+
+.comercio-upload-zone input[type="file"] {
+    display: none;
+}
+
+.comercio-section-subtitle {
+    font-size: 0.75rem;
+    color: var(--c-muted);
+    margin: -0.5rem 0 0.85rem;
+}
+
+/* Éxito */
+.comercio-success {
+    text-align: center;
+    padding: 3rem 1.5rem;
+    background: var(--c-card);
+    border: 1px solid var(--c-card-border);
+    border-radius: 14px;
+    margin-top: 2rem;
+}
+
+.comercio-success-icon {
+    width: 64px;
+    height: 64px;
+    background: var(--c-green-dim);
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.75rem;
+    color: var(--c-green);
+    margin-bottom: 1rem;
+}
+
+.comercio-success h2 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--c-text);
+    margin-bottom: 0.5rem;
+}
+
+.comercio-success p {
+    color: var(--c-muted);
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+.comercio-contacto {
+    margin-top: 1.25rem;
+    font-size: 0.72rem;
+    color: #555;
+    text-align: center;
+}
+
+.comercio-contacto a {
+    color: var(--c-muted) !important;
+    text-decoration: none;
+}
+
+.comercio-ticket-img {
+    max-width: 100%;
+    border-radius: 8px;
+    margin-bottom: 0.65rem;
+}
+
+.comercio-ya-facturado {
+    text-align: center;
+    color: var(--c-green);
+    font-size: 0.85rem;
+    font-weight: 600;
+}

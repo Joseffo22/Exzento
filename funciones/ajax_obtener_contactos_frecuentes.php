@@ -12,24 +12,30 @@ header('Access-Control-Allow-Headers: Content-Type');
 require_once('buscar_contacto_frecuente.php');
 
 try {
-    // Obtener todos los contactos frecuentes del usuario
-    $contactos = obtenerTodosLosContactosFrecuentes();
-    
-    if ($contactos && count($contactos) > 0) {
-        echo json_encode([
-            'success' => true,
-            'message' => 'Contactos obtenidos correctamente',
-            'contactos' => $contactos,
-            'total' => count($contactos)
-        ]);
-    } else {
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+
+    if (!isset($_SESSION['id_usuario'])) {
         echo json_encode([
             'success' => false,
-            'message' => 'No hay contactos frecuentes disponibles',
+            'message' => 'Sesión no válida',
             'contactos' => [],
             'total' => 0
         ]);
+        exit;
     }
+
+    $contactos = obtenerContactosFrecuentesUsuario($_SESSION['id_usuario']);
+
+    echo json_encode([
+        'success' => true,
+        'message' => count($contactos) > 0
+            ? 'Contactos obtenidos correctamente'
+            : 'No hay contactos frecuentes disponibles',
+        'contactos' => $contactos,
+        'total' => count($contactos)
+    ]);
     
 } catch (Exception $e) {
     echo json_encode([

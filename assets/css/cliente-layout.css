@@ -1,0 +1,110 @@
+/* Layout cliente — navegación inferior fija */
+body.cliente-app {
+    padding-bottom: 5.5rem;
+    background: #f9fafb;
+}
+
+.cliente-header {
+    background: #000;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 0.75rem 0;
+}
+
+.cliente-header .container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cliente-header .navbar-logo {
+    height: 26px;
+    width: auto;
+}
+
+.cliente-bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1030;
+    background: #fff;
+    border-top: 1px solid #e5e7eb;
+    box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.06);
+    padding: 0.35rem 0 calc(0.35rem + env(safe-area-inset-bottom));
+}
+
+.cliente-bottom-nav-inner {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    max-width: 520px;
+    margin: 0 auto;
+}
+
+.cliente-tab {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.15rem;
+    padding: 0.4rem 0.25rem;
+    text-decoration: none;
+    color: #6b7280;
+    font-size: 0.68rem;
+    font-weight: 600;
+    border: none;
+    background: none;
+    min-height: 3.25rem;
+}
+
+.cliente-tab i {
+    font-size: 1.15rem;
+}
+
+.cliente-tab.active {
+    color: #2563EB;
+}
+
+.cliente-tab:hover {
+    color: #2563EB;
+    text-decoration: none;
+}
+
+.cliente-footer-minimal {
+    text-align: center;
+    padding: 0.75rem 1rem 5rem;
+    color: #9ca3af;
+    font-size: 0.75rem;
+}
+
+.cliente-support-bar {
+    text-align: center;
+    padding: 0.75rem 1rem 1rem;
+    font-size: 0.85rem;
+    color: #6b7280;
+}
+
+.cliente-support-bar a {
+    color: #6b7280 !important;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.cliente-support-bar a:hover {
+    color: #2563EB !important;
+    text-decoration: underline;
+}
+
+.cliente-support-bar .sep {
+    margin: 0 0.5rem;
+    color: #d1d5db;
+}
+
+@media (min-width: 768px) {
+    .cliente-bottom-nav-inner {
+        max-width: 100%;
+    }
+
+    .cliente-tab {
+        font-size: 0.75rem;
+    }
+}

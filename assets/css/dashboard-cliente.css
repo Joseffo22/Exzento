@@ -1,0 +1,237 @@
+/* Dashboard cliente */
+.dashboard-page {
+    max-width: 520px;
+    margin: 0 auto;
+    padding: 1.25rem 1rem 1rem;
+}
+
+.dashboard-greeting h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0 0 0.25rem;
+    color: #111827;
+}
+
+.dashboard-greeting p {
+    margin: 0;
+    color: #6b7280;
+    font-size: 0.95rem;
+}
+
+.dashboard-metrics {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+    margin: 1.25rem 0;
+}
+
+.dashboard-metric {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 0.85rem 1rem;
+    text-decoration: none;
+    color: inherit;
+    transition: box-shadow 0.15s ease;
+}
+
+.dashboard-metric:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    color: inherit;
+}
+
+.dashboard-metric-value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    line-height: 1.1;
+}
+
+.dashboard-metric--pending .dashboard-metric-value {
+    color: #d97706;
+}
+
+.dashboard-metric--done .dashboard-metric-value {
+    color: #059669;
+}
+
+.dashboard-metric-label {
+    font-size: 0.8rem;
+    color: #6b7280;
+    margin-top: 0.15rem;
+    font-weight: 600;
+}
+
+.dashboard-cta {
+    display: block;
+    width: 100%;
+    background: #2563EB;
+    color: #fff !important;
+    border: none;
+    border-radius: 12px;
+    padding: 0.95rem 1.25rem;
+    font-size: 1.05rem;
+    font-weight: 700;
+    text-align: center;
+    text-decoration: none;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+}
+
+.dashboard-cta:hover {
+    background: #1d4ed8;
+    color: #fff !important;
+    transform: translateY(-1px);
+}
+
+.dashboard-section-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #374151;
+    margin: 0 0 0.75rem;
+}
+
+.dashboard-activity {
+    margin-bottom: 1.5rem;
+}
+
+.dashboard-activity-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.dashboard-activity-item {
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.dashboard-activity-item:last-child {
+    border-bottom: none;
+}
+
+.dashboard-activity-link {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.85rem 1rem;
+    text-decoration: none;
+    color: inherit;
+}
+
+.dashboard-activity-link:hover {
+    background: #f9fafb;
+    color: inherit;
+}
+
+.dashboard-activity-main {
+    min-width: 0;
+    flex: 1;
+}
+
+.dashboard-activity-title {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #111827;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.dashboard-activity-meta {
+    font-size: 0.78rem;
+    color: #9ca3af;
+    margin-top: 0.1rem;
+}
+
+.dashboard-activity-right {
+    text-align: right;
+    flex-shrink: 0;
+}
+
+.dashboard-activity-amount {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: #111827;
+}
+
+.dashboard-badge {
+    display: inline-block;
+    font-size: 0.68rem;
+    font-weight: 700;
+    padding: 0.15rem 0.45rem;
+    border-radius: 999px;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    margin-top: 0.2rem;
+}
+
+.dashboard-badge--pending {
+    background: #fef3c7;
+    color: #b45309;
+}
+
+.dashboard-badge--done {
+    background: #d1fae5;
+    color: #047857;
+}
+
+.dashboard-empty {
+    padding: 1.25rem 1rem;
+    text-align: center;
+    color: #9ca3af;
+    font-size: 0.9rem;
+}
+
+.dashboard-quick-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+    margin-bottom: 0.5rem;
+}
+
+.dashboard-quick-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 1rem 0.5rem;
+    text-decoration: none;
+    color: #374151;
+    font-size: 0.82rem;
+    font-weight: 600;
+    text-align: center;
+    min-height: 5.5rem;
+}
+
+.dashboard-quick-card i {
+    font-size: 1.35rem;
+    color: #2563EB;
+}
+
+.dashboard-quick-card:hover {
+    border-color: #2563EB;
+    color: #2563EB;
+    background: #eff6ff;
+}
+
+.dashboard-view-all {
+    display: block;
+    text-align: center;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #2563EB !important;
+    text-decoration: none;
+    margin-top: 0.5rem;
+}
+
+.dashboard-view-all:hover {
+    text-decoration: underline;
+}

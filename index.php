@@ -34,6 +34,13 @@ switch ($uri) {
                             require 'pages/lector-qr.php';
                             break;
                             case 'visualizar-ticket':
+                                if (session_status() === PHP_SESSION_NONE) {
+                                    session_start();
+                                }
+                                if (!isset($_SESSION['tipoUsuario'])) {
+                                    require 'logout/visualizar-ticket.php';
+                                    exit;
+                                }
                                 require 'pages/visualizar-ticket.php';
                                 break;
                                 case 'generar-ticket':
