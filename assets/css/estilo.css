@@ -186,11 +186,11 @@
 /* General styles (from header.php) */
 
 /* Estilos para enlaces */
-a:not(.btn):not(.nav-link) {
+a:not(.btn):not(.nav-link):not(.landing-btn):not(.btn-exzento-nav) {
     color: var(--bs-primary) !important;
     transition: all 0.3s ease;
 }
-a:not(.btn):not(.nav-link):hover {
+a:not(.btn):not(.nav-link):not(.landing-btn):not(.btn-exzento-nav):hover {
     color: var(--bs-primary-dark) !important;
 }
 

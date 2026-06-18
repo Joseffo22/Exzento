@@ -36,7 +36,7 @@
                             <span>Guarda todo en un solo lugar, automáticamente.</span>
                         </li>
                     </ul>
-                    <a href="/login" class="landing-btn">Quiero registrarme como cliente</a>
+                    <a href="/login" class="btn landing-btn">Quiero registrarme como cliente</a>
                 </div>
             </div>
             <div class="col-md-6">
@@ -52,7 +52,7 @@
                             <span>Sube la factura directamente. Sin correos. Sin WhatsApp. Sin errores.</span>
                         </li>
                     </ul>
-                    <a href="/login" class="landing-btn">Quiero registrarme como comercio</a>
+                    <a href="/login" class="btn landing-btn">Quiero registrarme como comercio</a>
                 </div>
             </div>
         </div>

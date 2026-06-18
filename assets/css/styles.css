@@ -22,13 +22,29 @@ h1, h2, h3, h4, h5, h6,
 
 /* General styles (from header.php) */
 
-/* Estilos para enlaces */
-a:not(.btn):not(.nav-link) {
+/* Enlaces de texto — excluir botones y CTAs */
+a:not(.btn):not(.nav-link):not(.landing-btn):not(.btn-exzento-nav):not(.whatsapp-btn) {
     color: var(--bs-primary) !important;
     transition: all 0.3s ease;
 }
-a:not(.btn):not(.nav-link):hover {
+a:not(.btn):not(.nav-link):not(.landing-btn):not(.btn-exzento-nav):not(.whatsapp-btn):hover {
     color: var(--bs-primary-dark) !important;
+}
+
+/* Texto blanco en botones azules */
+.btn-primary,
+.btn.btn-primary,
+.landing-btn,
+.btn-exzento-nav,
+.btn-login {
+    color: var(--exzento-white) !important;
+}
+.btn-primary:hover,
+.btn.btn-primary:hover,
+.landing-btn:hover,
+.btn-exzento-nav:hover,
+.btn-login:hover {
+    color: var(--exzento-white) !important;
 }
 
 /* Sobrescribir colores de Bootstrap con mayor especificidad */
