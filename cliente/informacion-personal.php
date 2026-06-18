@@ -60,9 +60,11 @@ $datos_fiscales = $stmt_datos->get_result();
             background: #2563EB;
             border: none;
             font-weight: 700;
+            color: #FFFFFF !important;
         }
         .btn-primary:hover {
             background: #1D4ED8;
+            color: #FFFFFF !important;
         }
     </style>
 </head>

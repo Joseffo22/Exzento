@@ -140,10 +140,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $invitacion_valida) {
             border-radius: 10px;
             padding: 12px 30px;
             font-weight: 700;
+            color: #FFFFFF !important;
         }
-        
+
         .btn-primary:hover {
             background: #1D4ED8;
+            color: #FFFFFF !important;
         }
         
         .form-control {

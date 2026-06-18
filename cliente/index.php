@@ -77,7 +77,7 @@ $conn->close();
         </a>
     </div>
 
-    <a href="/generar-ticket" class="dashboard-cta">
+    <a href="/generar-ticket" class="btn btn-primary dashboard-cta">
         <i class="fas fa-plus-circle me-2"></i>Nuevo ticket de facturación
     </a>
 

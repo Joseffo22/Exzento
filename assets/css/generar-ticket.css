@@ -122,9 +122,11 @@
 .ticket-form-actions .btn-primary {
     background-color: var(--ticket-blue);
     border-color: var(--ticket-blue);
+    color: #fff !important;
 }
 
 .ticket-form-actions .btn-primary:hover {
     background-color: #1d4ed8;
     border-color: #1d4ed8;
+    color: #fff !important;
 }

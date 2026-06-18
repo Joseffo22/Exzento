@@ -193,11 +193,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             border-radius: 25px;
             padding: 12px 30px;
             font-weight: 700;
+            color: #FFFFFF !important;
             transition: all 0.3s ease;
         }
-        
+
         .btn-primary:hover {
             background: #1D4ED8;
+            color: #FFFFFF !important;
             transform: translateY(-2px);
             box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3);
         }

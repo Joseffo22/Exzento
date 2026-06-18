@@ -22,25 +22,36 @@ h1, h2, h3, h4, h5, h6,
 
 /* General styles (from header.php) */
 
-/* Enlaces de texto — excluir botones y CTAs */
-a:not(.btn):not(.nav-link):not(.landing-btn):not(.btn-exzento-nav):not(.whatsapp-btn) {
+/* Enlaces de texto — excluir botones, CTAs y tabs */
+a:not(.btn):not(.nav-link):not(.landing-btn):not(.btn-exzento-nav):not(.whatsapp-btn):not(.dashboard-cta):not(.dashboard-view-all):not(.dashboard-quick-card):not(.dashboard-activity-link):not(.dashboard-metric):not(.cliente-tab):not(.df-btn-whatsapp):not(.comercio-btn-primary):not(.ticket-photo-btn) {
     color: var(--bs-primary) !important;
     transition: all 0.3s ease;
 }
-a:not(.btn):not(.nav-link):not(.landing-btn):not(.btn-exzento-nav):not(.whatsapp-btn):hover {
+a:not(.btn):not(.nav-link):not(.landing-btn):not(.btn-exzento-nav):not(.whatsapp-btn):not(.dashboard-cta):not(.dashboard-view-all):not(.dashboard-quick-card):not(.dashboard-activity-link):not(.dashboard-metric):not(.cliente-tab):not(.df-btn-whatsapp):not(.comercio-btn-primary):not(.ticket-photo-btn):hover {
     color: var(--bs-primary-dark) !important;
 }
 
-/* Texto blanco en botones azules */
+/* Texto blanco en botones azules sólidos */
 .btn-primary,
 .btn.btn-primary,
+a.btn-primary,
+a.btn.btn-primary,
+button.btn-primary,
 .landing-btn,
 .btn-exzento-nav,
-.btn-login {
+.btn-login,
+.dashboard-cta,
+.dashboard-cta:hover,
+.dashboard-cta:focus,
+.ticket-form-actions .btn-primary,
+.comercio-btn-primary,
+.comercio-btn-primary:hover {
     color: var(--exzento-white) !important;
 }
 .btn-primary:hover,
 .btn.btn-primary:hover,
+a.btn-primary:hover,
+a.btn.btn-primary:hover,
 .landing-btn:hover,
 .btn-exzento-nav:hover,
 .btn-login:hover {
@@ -324,6 +335,7 @@ a:not(.btn):not(.nav-link):not(.landing-btn):not(.btn-exzento-nav):not(.whatsapp
     border: none;
     border-radius: 10px;
     padding: 12px 30px;
+    color: var(--exzento-white) !important;
 }
 
 .btn-success {
@@ -431,6 +443,15 @@ a:not(.btn):not(.nav-link):not(.landing-btn):not(.btn-exzento-nav):not(.whatsapp
 
 .invitation-item:hover {
     box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+/* Refuerzo: botones azules dentro de tarjetas y como enlace */
+.card .btn-primary,
+.card a.btn.btn-primary,
+.card a.btn-primary,
+a.btn.btn-primary i,
+.btn-primary i {
+    color: var(--exzento-white) !important;
 }
 
 .status-badge {
