@@ -85,7 +85,7 @@ a:not(.btn):not(.nav-link):hover {
     padding: 0.25rem 0;
 }
 .navbar-logo {
-    height: 36px;
+    height: 32px;
     width: auto;
     display: block;
 }

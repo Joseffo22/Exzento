@@ -185,7 +185,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $invitacion_valida) {
             <div class="col-lg-6">
                 <div class="text-center mb-4">
                     <div class="logo">
-                        <img src="/assets/img/logo.jpeg" alt="Exzento">
+                        <img src="/assets/img/logo-white.png" alt="Exzento">
                     </div>
                     <p class="text-white-50 mt-2">La mejor plataforma de facturación</p>
                 </div>

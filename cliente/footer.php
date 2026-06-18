@@ -8,7 +8,7 @@
             <div class="col-md-3">
                 <div class="mb-3">
                     <h6 class="text-light mb-2">
-                        <img src="/assets/img/logo.jpeg" alt="Exzento" class="footer-logo">
+                        <img src="/assets/img/logo-white.png" alt="Exzento" class="footer-logo">
                     </h6>
                     <p class="text-muted small">
                         Sistema integral de facturación y gestión de tickets fiscales

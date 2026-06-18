@@ -15,7 +15,7 @@ $tipoUsuario=$_SESSION['tipoUsuario'];
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
   <!-- Custom Styles -->
   <link href="/assets/css/styles.css" rel="stylesheet">
-  <link rel="icon" href="/assets/img/logo.jpeg" type="image/jpeg">
+  <link rel="icon" href="/assets/img/logo.png" type="image/png">
   <!-- Web App Manifest -->
   <link rel="manifest" href="/assets/manifest.json">
   <!-- <link href="assets/css/estilo.css" rel="stylesheet"> -->
