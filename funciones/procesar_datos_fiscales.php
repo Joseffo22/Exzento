@@ -56,7 +56,7 @@ function procesarConstancia($archivo, $id_usuario) {
     }
 
     // Crear directorio si no existe
-    $upload_dir = '../../archivos/constancias/';
+    $upload_dir = __DIR__ . '/../archivos/constancias/';
     if (!file_exists($upload_dir)) {
         if (!mkdir($upload_dir, 0777, true)) {
             throw new Exception('Error al crear el directorio de constancias');

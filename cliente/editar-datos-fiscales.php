@@ -196,7 +196,7 @@ $usos = $conn->query($query_usos);
                                         <?php if ($datos['constancia']): ?>
                                             <div class="alert alert-info">
                                                 <i class="bi bi-file-earmark-pdf"></i> 
-                                                Constancia actual: <a href="https://movilisitica.com/<?= $datos['constancia'] ?>" target="_blank">Ver archivo</a>
+                                                Constancia actual: <a href="<?= site_url($datos['constancia']) ?>" target="_blank">Ver archivo</a>
                                             </div>
                                         <?php endif; ?>
                                         <label for="constancia" class="form-label">Nueva Constancia (PDF) - Opcional</label>

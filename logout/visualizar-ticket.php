@@ -50,11 +50,11 @@ if (!empty($datos['estado_factura']) && $datos['estado_factura'] === 'facturada'
 }
 
 $constancia = $datos['constancia'] ?? '';
-$urlConstancia = $constancia ? 'https://movilistica.com/' . $constancia : '';
+$urlConstancia = $constancia ? site_url($constancia) : '';
 $tieneTicket = !empty($datos['imagen_ticket']) || !empty($datos['foto_ticket']);
 $rutaTicket = !empty($datos['imagen_ticket'])
-    ? 'https://movilistica.com/archivos/tickets/' . $datos['imagen_ticket']
-    : (!empty($datos['foto_ticket']) ? 'https://movilistica.com/archivos/fotos_tickets/' . $datos['foto_ticket'] : '');
+    ? site_url('archivos/tickets/' . $datos['imagen_ticket'])
+    : (!empty($datos['foto_ticket']) ? site_url('archivos/fotos_tickets/' . $datos['foto_ticket']) : '');
 
 $datosFiscalesCopia = [
     'RFC' => $datos['rfc'] ?? '',
@@ -200,10 +200,10 @@ $conn->close();
         <div class="collapse" id="ticketCollapse">
             <div class="comercio-collapse-body text-center">
                 <?php if (!empty($datos['imagen_ticket'])): ?>
-                    <img src="https://movilistica.com/archivos/tickets/<?= htmlspecialchars($datos['imagen_ticket']) ?>" class="comercio-ticket-img" alt="Ticket">
+                    <img src="<?= site_url('archivos/tickets/' . htmlspecialchars($datos['imagen_ticket'])) ?>" class="comercio-ticket-img" alt="Ticket">
                 <?php endif; ?>
                 <?php if (!empty($datos['foto_ticket'])): ?>
-                    <img src="https://movilistica.com/archivos/fotos_tickets/<?= htmlspecialchars($datos['foto_ticket']) ?>" class="comercio-ticket-img" alt="Ticket">
+                    <img src="<?= site_url('archivos/fotos_tickets/' . htmlspecialchars($datos['foto_ticket'])) ?>" class="comercio-ticket-img" alt="Ticket">
                 <?php endif; ?>
                 <?php if ($rutaTicket): ?>
                 <a href="<?= htmlspecialchars($rutaTicket) ?>" class="comercio-btn comercio-btn-ghost" download target="_blank">

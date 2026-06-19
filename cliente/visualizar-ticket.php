@@ -60,10 +60,10 @@ echo "<!-- Datos obtenidos: " . print_r($datos, true) . " -->";
 $constancia=$datos['constancia'];
 
 // URLs
-$archivoQR = "https://movilistica.com/archivos/qrs/qr_$id_ticket.png";
-$urlTicket = "https://exzento.com/visualizar-ticket?id=$id_ticket";
-$urlQR = "https://movilistica.com/archivos/qrs/qr_$id_ticket.png";
-$urlConstancia = "https://movilistica.com/$constancia";
+$archivoQR = site_url("archivos/qrs/qr_$id_ticket.png");
+$urlTicket = site_url("visualizar-ticket?id=$id_ticket");
+$urlQR = site_url("archivos/qrs/qr_$id_ticket.png");
+$urlConstancia = $constancia ? site_url($constancia) : '';
 
 // Datos de facturación
 $datosFacturacion = [
@@ -181,14 +181,14 @@ $conn->close();
                             <div class="df-collapse-inner">
                                 <div class="text-center mb-3">
                                     <?php if ($datos['imagen_ticket']): ?>
-                                        <img src="https://movilistica.com/archivos/tickets/<?= htmlspecialchars($datos['imagen_ticket']) ?>"
+                                        <img src="<?= site_url('archivos/tickets/' . htmlspecialchars($datos['imagen_ticket'])) ?>"
                                              class="img-fluid mb-3"
                                              style="max-height: 400px; border-radius: 10px;"
                                              alt="Ticket"
                                              onerror="this.style.display='none';">
                                     <?php endif; ?>
                                     <?php if ($datos['foto_ticket']): ?>
-                                        <img src="https://movilistica.com/archivos/fotos_tickets/<?= htmlspecialchars($datos['foto_ticket']) ?>"
+                                        <img src="<?= site_url('archivos/fotos_tickets/' . htmlspecialchars($datos['foto_ticket'])) ?>"
                                              class="img-fluid"
                                              style="max-height: 400px; border-radius: 10px;"
                                              alt="Foto del ticket"

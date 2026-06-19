@@ -58,10 +58,10 @@ if (!$datos) {
 echo "<!-- Datos obtenidos: " . print_r($datos, true) . " -->";
 $constancia=$datos['constancia'];
 // URLs
-$archivoQR = "https://movilistica.com/archivos/qrs/qr_$id_ticket.png";
-$urlTicket = "https://exzento.com/visualizar-ticket?id=$id_ticket";
-$urlQR = "https://movilistica.com/archivos/qrs/qr_$id_ticket.png";
-$urlConstancia = "https://movilistica.com/$constancia";
+$archivoQR = site_url("archivos/qrs/qr_$id_ticket.png");
+$urlTicket = site_url("visualizar-ticket?id=$id_ticket");
+$urlQR = site_url("archivos/qrs/qr_$id_ticket.png");
+$urlConstancia = $constancia ? site_url($constancia) : '';
 
 // Datos de facturación
 $datosFacturacion = [
@@ -185,7 +185,7 @@ $conn->close();
                                 <div class="text-center">
                                     <?php if ($datos['imagen_ticket']): ?>
                                         <?php
-                                        $ruta_ticket = "https://movilistica.com/archivos/tickets/" . $datos['imagen_ticket'];
+                                        $ruta_ticket = site_url("archivos/tickets/" . $datos['imagen_ticket']);
                                         ?>
                                         <img src="<?= $ruta_ticket ?>" 
                                              class="img-fluid mb-3" 
@@ -196,7 +196,7 @@ $conn->close();
                                     
                                     <?php if ($datos['foto_ticket']): ?>
                                         <?php
-                                        $ruta_foto = "https://movilistica.com/archivos/fotos_tickets/" . $datos['foto_ticket'];
+                                        $ruta_foto = site_url("archivos/fotos_tickets/" . $datos['foto_ticket']);
                                         ?>
                                         <img src="<?= $ruta_foto ?>" 
                                              class="img-fluid" 

@@ -164,12 +164,12 @@ if ($stmt) {
                                 <?php if ($ticket['estado'] === 'facturada'): ?>
                                     <!-- FACTURADAS -->
                                     <div class="d-grid gap-2">
-                                        <a href="https://www.movilistica.com/<?= htmlspecialchars($ticket['archivo_pdf']) ?>" 
+                                        <a href="<?= site_url(htmlspecialchars($ticket['archivo_pdf'])) ?>" 
                                            target="_blank" 
                                            class="btn btn-outline-primary btn-sm">
                                             <i class="bi bi-file-pdf me-2"></i>Ver Factura PDF
                                         </a>
-                                        <a href="https://www.movilistica.com/<?= htmlspecialchars($ticket['archivo_xml']) ?>" 
+                                        <a href="<?= site_url(htmlspecialchars($ticket['archivo_xml'])) ?>" 
                                            download 
                                            class="btn btn-outline-secondary btn-sm">
                                             <i class="bi bi-file-code me-2"></i>Descargar XML
