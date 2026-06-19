@@ -59,7 +59,7 @@ echo "<!-- Datos obtenidos: " . print_r($datos, true) . " -->";
 $constancia=$datos['constancia'];
 // URLs
 $archivoQR = "https://movilistica.com/archivos/qrs/qr_$id_ticket.png";
-$urlTicket = "https://factu.movilistica.com/visualizar-ticket?id=$id_ticket";
+$urlTicket = "https://exzento.com/visualizar-ticket?id=$id_ticket";
 $urlQR = "https://movilistica.com/archivos/qrs/qr_$id_ticket.png";
 $urlConstancia = "https://movilistica.com/$constancia";
 
