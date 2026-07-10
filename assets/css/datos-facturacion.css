@@ -36,12 +36,38 @@
     border: none;
 }
 
+.df-btn-whatsapp,
+.btn.df-btn-whatsapp,
+.df-btn-whatsapp:hover,
+.df-btn-whatsapp:focus,
+.df-btn-whatsapp:active {
+    background: linear-gradient(135deg, var(--df-wa), var(--df-wa-dark)) !important;
+    border: none !important;
+    color: #fff !important;
+    display: block;
+    flex-shrink: 0;
+}
+
 .df-whatsapp-block {
     background: #f9fafb;
     border: 1px solid var(--df-border);
     border-radius: 12px;
     padding: 1rem;
     margin-bottom: 1rem;
+    overflow: visible;
+}
+
+body.cliente-app .df-page {
+    padding-bottom: 1rem;
+}
+
+body.cliente-app .df-btn-whatsapp {
+    margin-bottom: 0.5rem;
+}
+
+.df-dest-toggle.collapsed .bi-chevron-down,
+.df-collapse-trigger.collapsed .bi-chevron-down {
+    transform: rotate(0deg);
 }
 
 .df-dest-toggle {
@@ -89,9 +115,6 @@
 }
 
 .df-btn-whatsapp {
-    background: linear-gradient(135deg, var(--df-wa), var(--df-wa-dark));
-    border: none;
-    color: #fff;
     font-weight: 700;
     font-size: 1.05rem;
     padding: 0.85rem 1rem;
@@ -100,7 +123,6 @@
 }
 
 .df-btn-whatsapp:hover {
-    color: #fff;
     filter: brightness(1.05);
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(37, 211, 102, 0.35);

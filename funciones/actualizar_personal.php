@@ -34,21 +34,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         if ($stmt->affected_rows > 0) {
-            $_SESSION['mensaje'] = "Información personal actualizada correctamente";
+            $_SESSION['mensaje'] = "Tu nombre y apellido han sido actualizados: {$nombre} {$apellido}.";
         } else {
-            $_SESSION['mensaje'] = "No se realizaron cambios en la información";
+            $_SESSION['mensaje'] = 'No hubo cambios en tu nombre y apellido.';
         }
 
-        header('Location: ../informacion-personal');
+        header('Location: /informacion-personal#alertas-perfil');
         exit();
 
     } catch (Exception $e) {
         $_SESSION['error'] = $e->getMessage();
-        header('Location: ../informacion-personal');
+        header('Location: /informacion-personal#alertas-perfil');
         exit();
     }
 } else {
-    header('Location: ../informacion-personal');
+    header('Location: /informacion-personal');
     exit();
 }
 ?> 

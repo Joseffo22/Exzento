@@ -45,7 +45,10 @@ button.btn-primary,
 .dashboard-cta:focus,
 .ticket-form-actions .btn-primary,
 .comercio-btn-primary,
-.comercio-btn-primary:hover {
+.comercio-btn-primary:hover,
+.btn.df-btn-whatsapp,
+.df-btn-whatsapp,
+.df-btn-whatsapp:hover {
     color: var(--exzento-white) !important;
 }
 .btn-primary:hover,

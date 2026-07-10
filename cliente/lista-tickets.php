@@ -39,6 +39,20 @@ if ($stmt_empresas) {
         </div>
     </div>
 
+    <?php if (isset($_SESSION['mensaje'])): ?>
+    <div class="alert alert-success alert-dismissible fade show mt-3" role="alert">
+        <?= htmlspecialchars($_SESSION['mensaje']) ?>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <?php unset($_SESSION['mensaje']); endif; ?>
+
+    <?php if (isset($_SESSION['error'])): ?>
+    <div class="alert alert-danger alert-dismissible fade show mt-3" role="alert">
+        <?= htmlspecialchars($_SESSION['error']) ?>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <?php unset($_SESSION['error']); endif; ?>
+
     <!-- Filtros y controles de vista -->
     <div class="row mb-4">
         <div class="col-md-8">
@@ -214,6 +228,15 @@ if ($cliente_id !== '') {
                                             <i class="fas fa-clock me-1"></i>Pendiente de Facturación
                                         </button>
                                     <?php } ?>
+                                    <form method="POST"
+                                          action="/funciones/eliminar_ticket.php"
+                                          onsubmit="return confirm('¿Eliminar el ticket #<?= (int) $ticket['id'] ?>? Esta acción no se puede deshacer.');">
+                                        <input type="hidden" name="id_ticket" value="<?= (int) $ticket['id'] ?>">
+                                        <input type="hidden" name="redirect" value="/lista-tickets">
+                                        <button type="submit" class="btn btn-outline-danger btn-sm w-100">
+                                            <i class="fas fa-trash-alt me-1"></i>Eliminar
+                                        </button>
+                                    </form>
                                 </div>
                             </div>
                         </div>
@@ -286,6 +309,16 @@ if ($cliente_id !== '') {
                                                     <i class="fas fa-file-invoice"></i>
                                                 </a>
                                             <?php } ?>
+                                            <form method="POST"
+                                                  action="/funciones/eliminar_ticket.php"
+                                                  class="d-inline"
+                                                  onsubmit="return confirm('¿Eliminar el ticket #<?= (int) $ticket['id'] ?>? Esta acción no se puede deshacer.');">
+                                                <input type="hidden" name="id_ticket" value="<?= (int) $ticket['id'] ?>">
+                                                <input type="hidden" name="redirect" value="/lista-tickets">
+                                                <button type="submit" class="btn btn-outline-danger" title="Eliminar">
+                                                    <i class="fas fa-trash-alt"></i>
+                                                </button>
+                                            </form>
                                         </div>
                                     </td>
                                 </tr>

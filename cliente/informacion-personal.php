@@ -71,6 +71,7 @@ $datos_fiscales = $stmt_datos->get_result();
 <body class="bg-light">
     <div class="container py-5">
         <!-- Mensajes de éxito y error -->
+        <div id="alertas-perfil">
         <?php if (isset($_SESSION['mensaje'])): ?>
             <div class="alert alert-success alert-dismissible fade show" role="alert">
                 <i class="bi bi-check-circle"></i> <?= htmlspecialchars($_SESSION['mensaje']) ?>
@@ -86,6 +87,7 @@ $datos_fiscales = $stmt_datos->get_result();
             </div>
             <?php unset($_SESSION['error']); ?>
         <?php endif; ?>
+        </div>
 
         <!-- Información Personal -->
         <div class="row mb-4">
@@ -95,6 +97,9 @@ $datos_fiscales = $stmt_datos->get_result();
                         <h3 class="mb-0"><i class="bi bi-person-circle"></i> Información Personal</h3>
                     </div>
                     <div class="card-body">
+                        <p class="text-muted small mb-3">
+                            Aquí solo actualizas cómo te llamamos en Exzento. Tus datos fiscales (RFC, razón social, etc.) están en la sección de abajo.
+                        </p>
                         <form id="formPersonal" action="../funciones/actualizar_personal.php" method="POST">
                             <div class="row g-3">
                                 <div class="col-md-4">
@@ -110,8 +115,11 @@ $datos_fiscales = $stmt_datos->get_result();
                                 
                                 <div class="col-12">
                                     <button type="submit" class="btn btn-primary">
-                                        <i class="bi bi-save"></i> Actualizar Información
+                                        <i class="bi bi-save"></i> Guardar nombre y apellido
                                     </button>
+                                    <p class="form-text text-muted mb-0 mt-2">
+                                        Al guardar verás un mensaje de confirmación arriba. No se despliega ningún otro formulario.
+                                    </p>
                                 </div>
                             </div>
                         </form>

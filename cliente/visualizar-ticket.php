@@ -25,6 +25,10 @@ $query = "SELECT t.*,
 
           WHERE t.id = ?";
 
+if (isset($_SESSION['id_usuario'])) {
+    $query .= " AND t.id_cliente = ?";
+}
+
 // Debug de la consulta
 echo "<!-- Query: " . htmlspecialchars($query) . " -->";
 
@@ -33,7 +37,12 @@ if (!$stmt) {
     die("Error en la preparación de la consulta: " . $conn->error);
 }
 
-if (!$stmt->bind_param("i", $id_ticket)) {
+if (isset($_SESSION['id_usuario'])) {
+    $id_cliente = (int) $_SESSION['id_usuario'];
+    if (!$stmt->bind_param("ii", $id_ticket, $id_cliente)) {
+        die("Error al vincular parámetros: " . $stmt->error);
+    }
+} elseif (!$stmt->bind_param("i", $id_ticket)) {
     die("Error al vincular parámetros: " . $stmt->error);
 }
 
@@ -90,17 +99,11 @@ $stmt->close();
 $conn->close();
 ?>
 
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <title>QR Factura</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
-  <link href="/assets/css/datos-facturacion.css" rel="stylesheet">
-</head>
-<body class="bg-light df-page">
-    <div class="container py-4">
+<link href="/assets/css/datos-facturacion.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+
+<div class="df-page">
+    <div class="container py-4 pb-5">
         <div class="row justify-content-center">
             <div class="col-lg-8 col-md-10">
                 <div class="card df-card shadow-sm mb-4">
@@ -118,7 +121,7 @@ $conn->close();
 
                         <!-- WhatsApp: destinatario integrado + botón principal -->
                         <div class="df-whatsapp-block">
-                            <button class="df-dest-toggle"
+                            <button class="df-dest-toggle collapsed"
                                     type="button"
                                     data-bs-toggle="collapse"
                                     data-bs-target="#destinatarioCollapse"
@@ -169,11 +172,12 @@ $conn->close();
 
                         <!-- Ticket colapsado -->
                         <?php if ($datos['imagen_ticket'] || $datos['foto_ticket']): ?>
-                        <button class="df-collapse-trigger"
+                        <button class="df-collapse-trigger collapsed"
                                 type="button"
                                 data-bs-toggle="collapse"
                                 data-bs-target="#ticketCollapse"
-                                aria-expanded="false">
+                                aria-expanded="false"
+                                aria-controls="ticketCollapse">
                             <span><i class="bi bi-receipt me-2"></i>Ver ticket</span>
                             <i class="bi bi-chevron-down"></i>
                         </button>
@@ -218,11 +222,12 @@ $conn->close();
                         <?php endif; ?>
 
                         <!-- Datos fiscales colapsados -->
-                        <button class="df-collapse-trigger"
+                        <button class="df-collapse-trigger collapsed"
                                 type="button"
                                 data-bs-toggle="collapse"
                                 data-bs-target="#datosFiscalesCollapse"
-                                aria-expanded="false">
+                                aria-expanded="false"
+                                aria-controls="datosFiscalesCollapse">
                             <span><i class="bi bi-file-text me-2"></i>Ver datos fiscales</span>
                             <i class="bi bi-chevron-down"></i>
                         </button>
@@ -286,6 +291,19 @@ $conn->close();
                                 </div>
                             </div>
                         </div>
+
+                        <?php if (isset($_SESSION['id_usuario'])): ?>
+                        <form method="POST"
+                              action="/funciones/eliminar_ticket.php"
+                              class="mt-3"
+                              onsubmit="return confirm('¿Eliminar el ticket #<?= (int) $id_ticket ?>? Esta acción no se puede deshacer.');">
+                            <input type="hidden" name="id_ticket" value="<?= (int) $id_ticket ?>">
+                            <input type="hidden" name="redirect" value="/lista-tickets">
+                            <button type="submit" class="btn btn-outline-danger btn-sm w-100">
+                                <i class="bi bi-trash me-1"></i>Eliminar ticket
+                            </button>
+                        </form>
+                        <?php endif; ?>
                     </div>
                 </div>
 
@@ -481,8 +499,31 @@ $conn->close();
             contactosCargados = true;
         }
     });
-    </script>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+    document.getElementById('telefono').addEventListener('focus', function () {
+        const btnWa = document.querySelector('.df-btn-whatsapp');
+        if (btnWa) {
+            setTimeout(function () {
+                btnWa.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }, 300);
+        }
+    });
+
+    document.querySelectorAll('.df-dest-toggle, .df-collapse-trigger').forEach(function (trigger) {
+        const target = document.querySelector(trigger.getAttribute('data-bs-target'));
+        if (!target) {
+            return;
+        }
+
+        target.addEventListener('shown.bs.collapse', function () {
+            trigger.classList.remove('collapsed');
+            trigger.setAttribute('aria-expanded', 'true');
+        });
+
+        target.addEventListener('hidden.bs.collapse', function () {
+            trigger.classList.add('collapsed');
+            trigger.setAttribute('aria-expanded', 'false');
+        });
+    });
+    </script>
+</div>
