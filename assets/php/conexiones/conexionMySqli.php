@@ -1,4 +1,5 @@
 <?php
+	require_once __DIR__ . '/../config.php';
 	$servername = "localhost";
 	$username = "u737387366_facti";
 	$password = "7EnchiladasDePollo";

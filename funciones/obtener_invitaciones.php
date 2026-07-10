@@ -46,7 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                 'fecha_generacion' => $row['fecha_generacion'],
                 'usada' => $row['usada'],
                 'estado' => $row['estado'],
-                'link' => "https://factu.movilistica.com/unirse?id=" . $row['id'],
+                'link' => site_url("unirse?id=" . $row['id']),
                 'referido' => $row['usada'] == 1 ? [
                     'nombre' => $row['nombre_referido'],
                     'apellido' => $row['apellido_referido'],

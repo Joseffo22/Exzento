@@ -32,7 +32,7 @@ function procesarImagen($archivo) {
     }
 
     // Crear directorio si no existe
-    $directorio = '../../archivos/tickets/';
+    $directorio = __DIR__ . '/../archivos/tickets/';
     if (!file_exists($directorio)) {
         mkdir($directorio, 0777, true);
     }
@@ -58,7 +58,7 @@ function procesarFotoCamara($datosBase64) {
     }
 
     // Crear directorio si no existe
-    $directorio = '../../archivos/fotos_tickets/';
+    $directorio = __DIR__ . '/../archivos/fotos_tickets/';
     if (!file_exists($directorio)) {
         mkdir($directorio, 0777, true);
     }

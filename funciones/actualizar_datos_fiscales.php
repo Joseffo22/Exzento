@@ -12,7 +12,7 @@ function procesarConstancia($file, $id_usuario) {
         throw new Exception('Error al subir el archivo: ' . $file['constancia']['error']);
     }
 
-    $upload_dir = '../archivos/constancias/';
+    $upload_dir = __DIR__ . '/../archivos/constancias/';
     if (!is_dir($upload_dir)) {
         mkdir($upload_dir, 0755, true);
     }

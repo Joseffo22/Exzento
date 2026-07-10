@@ -74,7 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $id_invitacion = $stmt->insert_id;
         
         // Generar el link de invitación
-        $link_invitacion = "https://factu.movilistica.com/unirse?id=" . $id_invitacion;
+        $link_invitacion = site_url("unirse?id=" . $id_invitacion);
         
         echo json_encode([
             'success' => true,
