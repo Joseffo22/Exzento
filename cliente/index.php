@@ -67,7 +67,7 @@ $conn->close();
     </header>
 
     <div class="dashboard-metrics">
-        <a href="/facturas?filtro=pendientes" class="dashboard-metric dashboard-metric--pending">
+        <a href="/lista-tickets" class="dashboard-metric dashboard-metric--pending">
             <div class="dashboard-metric-value"><?= $pendientes ?></div>
             <div class="dashboard-metric-label">Pendientes</div>
         </a>

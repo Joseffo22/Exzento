@@ -2,8 +2,11 @@
 require('assets/php/conexiones/conexionMySqli.php');
 $cliente_id = $_SESSION['id_usuario'];
 
-// Obtener el filtro seleccionado
+// Obtener el filtro seleccionado (solo facturas reales: facturadas o recibidas manualmente)
 $filtro = $_GET['filtro'] ?? 'todas';
+if (!in_array($filtro, ['todas', 'facturadas', 'recibidas_manual'], true)) {
+    $filtro = 'todas';
+}
 $mes = $_GET['mes'] ?? '';
 
 // Procesar marcado como recibida manualmente
@@ -33,13 +36,13 @@ $query = "SELECT t.*,
                  f.id as factura_id, f.nombre_archivo, f.archivo_pdf, f.archivo_xml, f.creado_en as fecha_factura,
                  CASE 
                      WHEN f.id IS NOT NULL THEN 'facturada'
-                     WHEN t.descripcion LIKE '%Recibida manualmente%' THEN 'recibida_manual'
-                     ELSE 'pendiente'
+                     ELSE 'recibida_manual'
                  END as estado
           FROM ticket t
           LEFT JOIN datosFiscales df ON t.id_datos = df.id
           LEFT JOIN facturas f ON t.id = f.ticket_id
-          WHERE t.id_cliente = ?";
+          WHERE t.id_cliente = ?
+          AND (f.id IS NOT NULL OR t.descripcion LIKE '%Recibida manualmente%')";
 
 $params = [$cliente_id];
 $types = "s";
@@ -47,10 +50,8 @@ $types = "s";
 // Aplicar filtros
 if ($filtro === 'facturadas') {
     $query .= " AND f.id IS NOT NULL";
-} elseif ($filtro === 'pendientes') {
-    $query .= " AND f.id IS NULL AND t.descripcion NOT LIKE '%Recibida manualmente%'";
 } elseif ($filtro === 'recibidas_manual') {
-    $query .= " AND t.descripcion LIKE '%Recibida manualmente%'";
+    $query .= " AND f.id IS NULL AND t.descripcion LIKE '%Recibida manualmente%'";
 }
 
 if ($mes) {
@@ -88,7 +89,7 @@ if ($stmt) {
                 <h2 class="text-center mb-3">
                     <i class="bi bi-receipt me-2"></i>Mis Facturas
                 </h2>
-                <p class="text-center text-muted">Gestiona y consulta todas tus facturas</p>
+                <p class="text-center text-muted">Facturas que ya recibiste: subidas por el comercio o marcadas manualmente. Los tickets pendientes están en <a href="/lista-tickets">Mis tickets</a>.</p>
             </div>
         </div>
 
@@ -99,10 +100,9 @@ if ($stmt) {
                     <div class="col-md-6">
                         <label class="form-label">Filtrar por estado:</label>
                         <select class="form-select" onchange="cambiarFiltro(this.value)">
-                            <option value="todas" <?= $filtro === 'todas' ? 'selected' : '' ?>>Todas las facturas</option>
+                            <option value="todas" <?= $filtro === 'todas' ? 'selected' : '' ?>>Todas</option>
                             <option value="facturadas" <?= $filtro === 'facturadas' ? 'selected' : '' ?>>Facturadas</option>
-                            <option value="pendientes" <?= $filtro === 'pendientes' ? 'selected' : '' ?>>Pendientes</option>
-                            <option value="recibidas_manual" <?= $filtro === 'recibidas_manual' ? 'selected' : '' ?>>Recibidas Manualmente</option>
+                            <option value="recibidas_manual" <?= $filtro === 'recibidas_manual' ? 'selected' : '' ?>>Recibidas manualmente</option>
                         </select>
                     </div>
                     <div class="col-md-6">
@@ -127,16 +127,14 @@ if ($stmt) {
                     <div class="col-md-6 col-lg-4">
                         <div class="card shadow-sm h-100" style="border-radius: 15px; border: none;">
                             <!-- Header de la tarjeta con color según estado -->
-                            <div class="card-header <?= $ticket['estado'] === 'facturada' ? 'bg-success text-white' : ($ticket['estado'] === 'pendiente' ? 'bg-warning text-dark' : 'bg-info text-white') ?>" 
+                            <div class="card-header <?= $ticket['estado'] === 'facturada' ? 'bg-success text-white' : 'bg-info text-white' ?>" 
                                  style="border-radius: 15px 15px 0 0;">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <h6 class="mb-0">
                                         <?php if ($ticket['estado'] === 'facturada'): ?>
                                             <i class="bi bi-check-circle me-2"></i>FACTURADA
-                                        <?php elseif ($ticket['estado'] === 'pendiente'): ?>
-                                            <i class="bi bi-hourglass-split me-2"></i>PENDIENTE
                                         <?php else: ?>
-                                            <i class="bi bi-hand-index me-2"></i>RECIBIDA MANUAL
+                                            <i class="bi bi-hand-index me-2"></i>RECIBIDA MANUALMENTE
                                         <?php endif; ?>
                                     </h6>
                                     <span class="badge bg-light text-dark">#<?= $ticket['id'] ?></span>
@@ -167,7 +165,7 @@ if ($stmt) {
                                         <a href="<?= site_url(htmlspecialchars($ticket['archivo_pdf'])) ?>" 
                                            target="_blank" 
                                            class="btn btn-outline-primary btn-sm">
-                                            <i class="bi bi-file-pdf me-2"></i>Ver Factura PDF
+                                            <i class="bi bi-file-pdf me-2"></i>Ver factura PDF
                                         </a>
                                         <a href="<?= site_url(htmlspecialchars($ticket['archivo_xml'])) ?>" 
                                            download 
@@ -176,26 +174,8 @@ if ($stmt) {
                                         </a>
                                         <a href="visualizar-ticket?id=<?= $ticket['id'] ?>" 
                                            class="btn btn-outline-info btn-sm">
-                                            <i class="bi bi-receipt me-2"></i>Ver Ticket
+                                            <i class="bi bi-receipt me-2"></i>Ver ticket
                                         </a>
-                                    </div>
-
-                                <?php elseif ($ticket['estado'] === 'pendiente'): ?>
-                                    <!-- PENDIENTES -->
-                                    <div class="alert alert-warning py-2 mb-3" style="font-size: 0.9rem;">
-                                        <i class="bi bi-exclamation-triangle me-2"></i>
-                                        Aún no has recibido la factura de este ticket
-                                    </div>
-                                    
-                                    <div class="d-grid gap-2">
-                                        <button onclick="reenviarSolicitud(<?= $ticket['id'] ?>)" 
-                                                class="btn btn-warning btn-sm">
-                                            <i class="bi bi-arrow-repeat me-2"></i>Reenviar solicitud
-                                        </button>
-                                        <button onclick="mostrarModalRecibida(<?= $ticket['id'] ?>)" 
-                                                class="btn btn-outline-success btn-sm">
-                                            <i class="bi bi-check-circle me-2"></i>Recibí esta factura
-                                        </button>
                                     </div>
 
                                 <?php else: ?>
@@ -208,7 +188,7 @@ if ($stmt) {
                                     <div class="d-grid">
                                         <a href="visualizar-ticket?id=<?= $ticket['id'] ?>" 
                                            class="btn btn-outline-info btn-sm">
-                                            <i class="bi bi-receipt me-2"></i>Ver Ticket
+                                            <i class="bi bi-receipt me-2"></i>Ver ticket
                                         </a>
                                     </div>
                                 <?php endif; ?>
@@ -230,68 +210,9 @@ if ($stmt) {
             <div class="text-center py-5">
                 <i class="bi bi-inbox display-1 text-muted mb-3"></i>
                 <h4 class="text-muted">No se encontraron facturas</h4>
-                <p class="text-muted">No hay facturas que coincidan con los filtros seleccionados.</p>
+                <p class="text-muted">Aún no tienes facturas recibidas. Revisa tus solicitudes pendientes en <a href="/lista-tickets">Mis tickets</a>.</p>
             </div>
         <?php endif; ?>
-    </div>
-
-    <!-- Modal para marcar como recibida -->
-    <div class="modal fade" id="modalRecibida" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content" style="border-radius: 15px;">
-                <div class="modal-header">
-                    <h5 class="modal-title">
-                        <i class="bi bi-check-circle me-2 text-success"></i>
-                        ¿Dónde recibiste esta factura?
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <form method="POST">
-                    <div class="modal-body">
-                        <input type="hidden" name="action" value="marcar_recibida">
-                        <input type="hidden" name="ticket_id" id="ticket_id_modal">
-                        
-                        <div class="mb-3">
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="canal" id="canal_email" value="Correo electrónico" required>
-                                <label class="form-check-label" for="canal_email">
-                                    <i class="bi bi-envelope me-2"></i>Correo electrónico
-                                </label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="canal" id="canal_whatsapp" value="WhatsApp" required>
-                                <label class="form-check-label" for="canal_whatsapp">
-                                    <i class="bi bi-whatsapp me-2"></i>WhatsApp
-                                </label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="canal" id="canal_fisico" value="Físicamente" required>
-                                <label class="form-check-label" for="canal_fisico">
-                                    <i class="bi bi-file-earmark me-2"></i>Físicamente
-                                </label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="canal" id="canal_otro" value="Otro" required>
-                                <label class="form-check-label" for="canal_otro">
-                                    <i class="bi bi-three-dots me-2"></i>Otro
-                                </label>
-                            </div>
-                        </div>
-                        
-                        <div class="mb-3" id="otro_canal_div" style="display: none;">
-                            <label for="otro_canal" class="form-label">Especificar:</label>
-                            <input type="text" class="form-control" id="otro_canal" name="otro_canal" placeholder="Ej: Telegram, SMS, etc.">
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-success">
-                            <i class="bi bi-check-circle me-2"></i>Marcar como Recibida
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
     </div>
 
     <style>
@@ -328,38 +249,6 @@ if ($stmt) {
         }
         window.location.href = url.toString();
     }
-
-    function reenviarSolicitud(ticketId) {
-        // Guardar el medio de envío en localStorage
-        const medio = localStorage.getItem('medio_envio_' + ticketId) || 'whatsapp';
-        
-        if (medio === 'whatsapp') {
-            window.open(`visualizar-ticket?id=${ticketId}`, '_blank');
-        } else {
-            window.open(`visualizar-ticket?id=${ticketId}`, '_blank');
-        }
-    }
-
-    function mostrarModalRecibida(ticketId) {
-        document.getElementById('ticket_id_modal').value = ticketId;
-        new bootstrap.Modal(document.getElementById('modalRecibida')).show();
-    }
-
-    // Mostrar campo "Otro" cuando se selecciona
-    document.querySelectorAll('input[name="canal"]').forEach(radio => {
-        radio.addEventListener('change', function() {
-            const otroDiv = document.getElementById('otro_canal_div');
-            const otroInput = document.getElementById('otro_canal');
-            
-            if (this.value === 'Otro') {
-                otroDiv.style.display = 'block';
-                otroInput.required = true;
-            } else {
-                otroDiv.style.display = 'none';
-                otroInput.required = false;
-            }
-        });
-    });
     </script>
 </body>
 </html>
