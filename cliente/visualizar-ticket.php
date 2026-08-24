@@ -94,6 +94,19 @@ $datosFacturacion = [
 
 $mensaje = construirMensajeWhatsAppFactura($id_ticket, $datos, $urlTicket);
 
+$ticketPendienteFactura = false;
+if (isset($_SESSION['id_usuario'])) {
+    $stmtFactura = $conn->prepare('SELECT id FROM facturas WHERE ticket_id = ? LIMIT 1');
+    if ($stmtFactura) {
+        $stmtFactura->bind_param('i', $id_ticket);
+        $stmtFactura->execute();
+        $tieneFactura = $stmtFactura->get_result()->num_rows > 0;
+        $stmtFactura->close();
+        $esRecibidaManual = stripos((string) ($datos['descripcion'] ?? ''), 'Recibida manualmente') !== false;
+        $ticketPendienteFactura = !$tieneFactura && !$esRecibidaManual;
+    }
+}
+
 // Cerrar la conexión
 $stmt->close();
 $conn->close();
@@ -293,9 +306,16 @@ $conn->close();
                         </div>
 
                         <?php if (isset($_SESSION['id_usuario'])): ?>
+                        <?php if (!empty($ticketPendienteFactura)): ?>
+                        <button type="button"
+                                class="btn btn-outline-success btn-sm w-100 mt-3"
+                                onclick="window.location.href='/lista-tickets?marcar=<?= (int) $id_ticket ?>'">
+                            <i class="bi bi-check-circle me-1"></i>Recibí esta factura
+                        </button>
+                        <?php endif; ?>
                         <form method="POST"
                               action="/funciones/eliminar_ticket.php"
-                              class="mt-3"
+                              class="mt-2"
                               onsubmit="return confirm('¿Eliminar el ticket #<?= (int) $id_ticket ?>? Esta acción no se puede deshacer.');">
                             <input type="hidden" name="id_ticket" value="<?= (int) $id_ticket ?>">
                             <input type="hidden" name="redirect" value="/lista-tickets">

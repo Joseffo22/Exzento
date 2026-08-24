@@ -2,6 +2,38 @@
 require('assets/php/conexiones/conexionMySqli.php');
 $cliente_id = $_SESSION['id_usuario'];
 
+// Marcar ticket como factura recibida manualmente
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'marcar_recibida') {
+    $ticket_id = (int) ($_POST['ticket_id'] ?? 0);
+    $canal = trim($_POST['canal'] ?? '');
+    $otro_canal = trim($_POST['otro_canal'] ?? '');
+
+    if ($ticket_id > 0 && $canal !== '') {
+        $nota = 'Recibida manualmente el ' . date('d/m/Y H:i') . ' por: ' . $canal;
+        if ($canal === 'Otro' && $otro_canal !== '') {
+            $nota .= ' - ' . $otro_canal;
+        }
+
+        $stmt = $conn->prepare("UPDATE ticket SET descripcion = CONCAT(COALESCE(descripcion, ''), ' - ', ?) WHERE id = ? AND id_cliente = ?");
+        if ($stmt) {
+            $stmt->bind_param('sis', $nota, $ticket_id, $cliente_id);
+            if ($stmt->execute() && $stmt->affected_rows > 0) {
+                $_SESSION['mensaje'] = "Ticket #{$ticket_id} marcado como factura recibida manualmente.";
+            } else {
+                $_SESSION['error'] = 'No se pudo marcar el ticket. Verifica que te pertenezca.';
+            }
+            $stmt->close();
+        } else {
+            $_SESSION['error'] = 'Error al preparar la actualización.';
+        }
+    } else {
+        $_SESSION['error'] = 'Selecciona dónde recibiste la factura.';
+    }
+
+    header('Location: /lista-tickets');
+    exit;
+}
+
 // Obtener parámetros de filtro
 $busqueda = $_GET['busqueda'] ?? '';
 $empresa = $_GET['empresa'] ?? '';
@@ -218,14 +250,28 @@ if ($cliente_id !== '') {
                                        class="btn btn-outline-primary btn-sm">
                                         <i class="fas fa-eye me-1"></i>Ver Detalles
                                     </a>
+                                    <?php
+                                    $esRecibidaManual = stripos((string) ($ticket['descripcion'] ?? ''), 'Recibida manualmente') !== false;
+                                    $esPendiente = (int) $ticket['num_facturas'] === 0 && !$esRecibidaManual;
+                                    ?>
                                     <?php if ($ticket['num_facturas'] > 0) { ?>
-                                        <a href="/facturas?ticket_id=<?= $ticket['id'] ?>" 
+                                        <a href="/facturas?filtro=facturadas" 
                                            class="btn btn-outline-success btn-sm">
                                             <i class="fas fa-file-invoice me-1"></i>Ver Facturas
+                                        </a>
+                                    <?php } elseif ($esRecibidaManual) { ?>
+                                        <a href="/facturas?filtro=recibidas_manual" 
+                                           class="btn btn-outline-info btn-sm">
+                                            <i class="fas fa-hand-index me-1"></i>Recibida manualmente
                                         </a>
                                     <?php } else { ?>
                                         <button class="btn btn-outline-warning btn-sm" disabled>
                                             <i class="fas fa-clock me-1"></i>Pendiente de Facturación
+                                        </button>
+                                        <button type="button"
+                                                class="btn btn-outline-success btn-sm"
+                                                onclick="mostrarModalRecibida(<?= (int) $ticket['id'] ?>)">
+                                            <i class="fas fa-check-circle me-1"></i>Recibí esta factura
                                         </button>
                                     <?php } ?>
                                     <form method="POST"
@@ -303,11 +349,22 @@ if ($cliente_id !== '') {
                                                class="btn btn-outline-primary" title="Ver Detalles">
                                                 <i class="fas fa-eye"></i>
                                             </a>
+                                            <?php
+                                            $esRecibidaManual = stripos((string) ($ticket['descripcion'] ?? ''), 'Recibida manualmente') !== false;
+                                            $esPendiente = (int) $ticket['num_facturas'] === 0 && !$esRecibidaManual;
+                                            ?>
                                             <?php if ($ticket['num_facturas'] > 0) { ?>
-                                                <a href="/facturas?ticket_id=<?= $ticket['id'] ?>" 
+                                                <a href="/facturas?filtro=facturadas" 
                                                    class="btn btn-outline-success" title="Ver Facturas">
                                                     <i class="fas fa-file-invoice"></i>
                                                 </a>
+                                            <?php } elseif ($esPendiente) { ?>
+                                                <button type="button"
+                                                        class="btn btn-outline-success"
+                                                        title="Recibí esta factura"
+                                                        onclick="mostrarModalRecibida(<?= (int) $ticket['id'] ?>)">
+                                                    <i class="fas fa-check-circle"></i>
+                                                </button>
                                             <?php } ?>
                                             <form method="POST"
                                                   action="/funciones/eliminar_ticket.php"
@@ -404,5 +461,101 @@ if ($cliente_id !== '') {
 }
 ?>
 </div>
+
+<!-- Modal: marcar factura recibida manualmente -->
+<div class="modal fade" id="modalRecibida" tabindex="-1" aria-labelledby="modalRecibidaLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content" style="border-radius: 15px;">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalRecibidaLabel">
+                    <i class="fas fa-check-circle me-2 text-success"></i>
+                    ¿Dónde recibiste esta factura?
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <form method="POST" action="/lista-tickets">
+                <div class="modal-body">
+                    <input type="hidden" name="action" value="marcar_recibida">
+                    <input type="hidden" name="ticket_id" id="ticket_id_modal">
+
+                    <p class="text-muted small">
+                        Úsalo cuando el comercio te envió la factura por otro medio y no la subió a Exzento.
+                    </p>
+
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="canal" id="canal_email" value="Correo electrónico" required>
+                            <label class="form-check-label" for="canal_email">
+                                <i class="fas fa-envelope me-2"></i>Correo electrónico
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="canal" id="canal_whatsapp" value="WhatsApp" required>
+                            <label class="form-check-label" for="canal_whatsapp">
+                                <i class="fab fa-whatsapp me-2"></i>WhatsApp
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="canal" id="canal_fisico" value="Físicamente" required>
+                            <label class="form-check-label" for="canal_fisico">
+                                <i class="fas fa-file-alt me-2"></i>Físicamente
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="canal" id="canal_otro" value="Otro" required>
+                            <label class="form-check-label" for="canal_otro">
+                                <i class="fas fa-ellipsis-h me-2"></i>Otro
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="mb-3" id="otro_canal_div" style="display: none;">
+                        <label for="otro_canal" class="form-label">Especificar:</label>
+                        <input type="text" class="form-control" id="otro_canal" name="otro_canal" placeholder="Ej: Telegram, SMS, etc.">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-check-circle me-2"></i>Marcar como recibida
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function mostrarModalRecibida(ticketId) {
+    document.getElementById('ticket_id_modal').value = ticketId;
+    new bootstrap.Modal(document.getElementById('modalRecibida')).show();
+}
+
+document.querySelectorAll('input[name="canal"]').forEach(function (radio) {
+    radio.addEventListener('change', function () {
+        const otroDiv = document.getElementById('otro_canal_div');
+        const otroInput = document.getElementById('otro_canal');
+        if (this.value === 'Otro') {
+            otroDiv.style.display = 'block';
+            otroInput.required = true;
+        } else {
+            otroDiv.style.display = 'none';
+            otroInput.required = false;
+            otroInput.value = '';
+        }
+    });
+});
+
+document.addEventListener('DOMContentLoaded', function () {
+    const params = new URLSearchParams(window.location.search);
+    const marcarId = params.get('marcar');
+    if (marcarId) {
+        mostrarModalRecibida(marcarId);
+        params.delete('marcar');
+        const clean = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
+        window.history.replaceState({}, '', clean);
+    }
+});
+</script>
 
 </body>

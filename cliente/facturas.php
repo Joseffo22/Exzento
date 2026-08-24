@@ -9,27 +9,6 @@ if (!in_array($filtro, ['todas', 'facturadas', 'recibidas_manual'], true)) {
 }
 $mes = $_GET['mes'] ?? '';
 
-// Procesar marcado como recibida manualmente
-if (isset($_POST['action']) && $_POST['action'] === 'marcar_recibida') {
-    $ticket_id = $_POST['ticket_id'];
-    $canal = $_POST['canal'];
-    $otro_canal = $_POST['otro_canal'] ?? '';
-    $nota = "Recibida manualmente el " . date('d/m/Y H:i') . " por: " . $canal;
-    if ($otro_canal) $nota .= " - " . $otro_canal;
-    
-    // Actualizar la descripción del ticket con la nota
-    $stmt = $conn->prepare("UPDATE ticket SET descripcion = CONCAT(COALESCE(descripcion, ''), ' - ', ?) WHERE id = ? AND id_cliente = ?");
-    if ($stmt) {
-        $stmt->bind_param("sis", $nota, $ticket_id, $cliente_id);
-        $stmt->execute();
-        $stmt->close();
-    }
-    
-    // Redirigir para evitar reenvío del formulario
-    header("Location: facturas?filtro=" . $filtro);
-    exit;
-}
-
 // Obtener tickets del cliente usando solo la estructura existente
 $query = "SELECT t.*, 
                  df.razonSocial, df.rfc,
