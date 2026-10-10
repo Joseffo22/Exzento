@@ -69,7 +69,10 @@ switch ($uri) {
                                                             case 'contactos-frecuentes':
                                                                 require 'pages/contactos-frecuentes.php';
                                                                 break;
-    
+
+                                                    case 'resumen':
+                                                        require 'pages/resumen.php';
+                                                        break;
 
     case 'facturacion':
         require 'pages/facturacion.php';

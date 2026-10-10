@@ -1,0 +1,338 @@
+/* Mis Facturas — tarjetas compactas + filtros */
+.facturas-page {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 1.15rem 1rem 1.5rem;
+}
+
+.facturas-header h1 {
+    font-size: 1.55rem;
+    font-weight: 800;
+    margin: 0 0 0.35rem;
+    color: #111827;
+}
+
+.facturas-header p {
+    margin: 0;
+    color: #6b7280;
+    font-size: 0.9rem;
+    line-height: 1.45;
+}
+
+.facturas-header a {
+    font-weight: 700;
+}
+
+.facturas-filters {
+    margin: 1.1rem 0 0.85rem;
+}
+
+.facturas-selects {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.65rem;
+    margin-bottom: 0.75rem;
+}
+
+.facturas-selects .form-select {
+    border-radius: 10px;
+    border: 1px solid #e5e7eb;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: #111827;
+    background-color: #fff;
+}
+
+.facturas-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+}
+
+.facturas-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.4rem 0.75rem;
+    border-radius: 999px;
+    border: 1px solid #e5e7eb;
+    background: #fff;
+    color: #4b5563 !important;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-decoration: none;
+    line-height: 1.2;
+}
+
+.facturas-chip:hover {
+    border-color: #2563EB;
+    color: #2563EB !important;
+    text-decoration: none;
+}
+
+.facturas-chip.active {
+    background: #2563EB;
+    border-color: #2563EB;
+    color: #fff !important;
+}
+
+.facturas-chip-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.25rem;
+    padding: 0.05rem 0.35rem;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 800;
+    background: rgba(0, 0, 0, 0.08);
+}
+
+.facturas-chip.active .facturas-chip-count {
+    background: rgba(255, 255, 255, 0.22);
+}
+
+.facturas-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+}
+
+.factura-card {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.factura-card-main {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 0.75rem;
+    align-items: start;
+    padding: 0.85rem 0.9rem;
+    width: 100%;
+    border: 0;
+    background: transparent;
+    text-align: left;
+    cursor: pointer;
+}
+
+.factura-card-main:hover {
+    background: #f9fafb;
+}
+
+.factura-folio {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: 3.4rem;
+    padding: 0.45rem 0.35rem;
+    border-radius: 10px;
+    background: #111827;
+    color: #fff;
+    line-height: 1.1;
+}
+
+.factura-folio-label {
+    font-size: 0.58rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    opacity: 0.75;
+}
+
+.factura-folio-num {
+    font-size: 0.95rem;
+    font-weight: 800;
+}
+
+.factura-body {
+    min-width: 0;
+}
+
+.factura-row {
+    margin-bottom: 0.2rem;
+}
+
+.factura-row:last-child {
+    margin-bottom: 0;
+}
+
+.factura-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #9ca3af;
+    margin-right: 0.25rem;
+}
+
+.factura-comercio {
+    font-size: 0.92rem;
+    font-weight: 750;
+    color: #111827;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.factura-cuenta {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #4b5563;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.factura-fecha {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin-top: 0.3rem;
+    font-size: 0.76rem;
+    color: #9ca3af;
+    font-weight: 600;
+}
+
+.factura-side {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.35rem;
+    flex-shrink: 0;
+}
+
+.factura-monto {
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: #111827;
+    white-space: nowrap;
+}
+
+.factura-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 999px;
+    font-size: 0.68rem;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+.factura-badge--ok {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.factura-badge--manual {
+    background: #e0f2fe;
+    color: #0369a1;
+}
+
+.factura-chevron {
+    color: #9ca3af;
+    font-size: 0.75rem;
+    transition: transform 0.2s ease;
+}
+
+.factura-card.open .factura-chevron {
+    transform: rotate(180deg);
+}
+
+.factura-detail {
+    display: none;
+    border-top: 1px solid #f3f4f6;
+    padding: 0.85rem 0.95rem 1rem;
+    background: #f9fafb;
+}
+
+.factura-card.open .factura-detail {
+    display: block;
+}
+
+.factura-detail-grid {
+    display: grid;
+    gap: 0.45rem;
+    margin-bottom: 0.85rem;
+    font-size: 0.82rem;
+}
+
+.factura-detail-item {
+    display: grid;
+    grid-template-columns: 7.5rem 1fr;
+    gap: 0.4rem;
+}
+
+.factura-detail-item dt {
+    margin: 0;
+    color: #9ca3af;
+    font-weight: 700;
+    font-size: 0.74rem;
+}
+
+.factura-detail-item dd {
+    margin: 0;
+    color: #374151;
+    font-weight: 600;
+    word-break: break-word;
+}
+
+.factura-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+}
+
+.factura-actions .btn {
+    border-radius: 8px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    padding: 0.4rem 0.7rem;
+}
+
+.facturas-empty {
+    text-align: center;
+    padding: 2.5rem 1rem;
+    color: #6b7280;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+}
+
+.facturas-empty i {
+    font-size: 2.25rem;
+    color: #d1d5db;
+    margin-bottom: 0.75rem;
+}
+
+.facturas-empty h2 {
+    font-size: 1.1rem;
+    font-weight: 750;
+    color: #4b5563;
+    margin: 0 0 0.4rem;
+}
+
+.facturas-empty p {
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+@media (max-width: 420px) {
+    .factura-card-main {
+        grid-template-columns: auto 1fr;
+    }
+
+    .factura-side {
+        grid-column: 2;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+    }
+
+    .factura-detail-item {
+        grid-template-columns: 1fr;
+        gap: 0.1rem;
+    }
+}

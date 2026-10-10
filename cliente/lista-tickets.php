@@ -386,67 +386,7 @@ if ($cliente_id !== '') {
                 </div>
             </div>
             <?php endif; ?>
-            
-            <!-- Resumen estadístico -->
-            <div class="row mt-4">
-                <div class="col-md-3">
-                    <div class="card bg-primary text-white">
-                        <div class="card-body text-center">
-                            <h4 class="mb-0"><?= $res->num_rows ?></h4>
-                            <small>Tickets encontrados</small>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card bg-success text-white">
-                        <div class="card-body text-center">
-                            <?php
-                            $stmt->execute();
-                            $res2 = $stmt->get_result();
-                            $total_facturas = 0;
-                            while ($t = $res2->fetch_assoc()) {
-                                $total_facturas += $t['num_facturas'];
-                            }
-                            ?>
-                            <h4 class="mb-0"><?= $total_facturas ?></h4>
-                            <small>Total de Facturas</small>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card bg-info text-white">
-                        <div class="card-body text-center">
-                            <?php
-                            $stmt->execute();
-                            $res3 = $stmt->get_result();
-                            $total_monto = 0;
-                            while ($t = $res3->fetch_assoc()) {
-                                $total_monto += $t['monto'];
-                            }
-                            ?>
-                            <h4 class="mb-0">$<?= number_format($total_monto, 2) ?></h4>
-                            <small>Monto Total</small>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card bg-warning text-dark">
-                        <div class="card-body text-center">
-                            <?php
-                            $stmt->execute();
-                            $res4 = $stmt->get_result();
-                            $sin_empresa = 0;
-                            while ($t = $res4->fetch_assoc()) {
-                                if (!$t['id_empresa']) $sin_empresa++;
-                            }
-                            ?>
-                            <h4 class="mb-0"><?= $sin_empresa ?></h4>
-                            <small>Sin Empresa</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
+
         <?php
         } else {
             echo '<div class="alert alert-info text-center">

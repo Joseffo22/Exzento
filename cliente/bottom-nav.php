@@ -3,6 +3,7 @@ $uriActual = $uri ?? trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/')
 
 $tabsTickets = ['generar-ticket', 'lista-tickets', 'lector-qr', 'visualizar-ticket'];
 $tabsFacturas = ['facturas'];
+$tabsResumen = ['resumen'];
 $tabsPerfil = ['informacion-personal', 'registrar-datos-fiscales', 'editar-datos-fiscales', 'contactos-frecuentes', 'invitacion-amigo'];
 
 $tabs = [
@@ -23,6 +24,12 @@ $tabs = [
         'icon' => 'fa-file-invoice-dollar',
         'label' => 'Facturas',
         'active' => in_array($uriActual, $tabsFacturas, true),
+    ],
+    [
+        'href' => '/resumen',
+        'icon' => 'fa-chart-pie',
+        'label' => 'Resumen',
+        'active' => in_array($uriActual, $tabsResumen, true),
     ],
     [
         'href' => '/informacion-personal',
