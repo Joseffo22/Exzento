@@ -1,6 +1,8 @@
 <?php
 require('assets/php/conexiones/conexionMySqli.php');
+require_once('funciones/comercio_helpers.php');
 $cliente_id = $_SESSION['id_usuario'];
+$sqlManualFact = exzento_sql_es_recibida_manual($conn);
 
 $mesesEs = [
     1 => 'Enero', 2 => 'Febrero', 3 => 'Marzo', 4 => 'Abril',
@@ -118,7 +120,7 @@ for ($i = 0; $i < 24; $i++) {
 $filtroBaseSql = " WHERE t.id_cliente = ?
   AND (
     EXISTS (SELECT 1 FROM facturas f0 WHERE f0.ticket_id = t.id)
-    OR COALESCE(t.descripcion, '') LIKE '%Recibida manualmente%'
+    OR {$sqlManualFact}
   )";
 $paramsBase = [$cliente_id];
 $typesBase = 's';
@@ -147,7 +149,7 @@ $queryConteos = "SELECT
     SUM(CASE WHEN EXISTS (SELECT 1 FROM facturas f WHERE f.ticket_id = t.id) THEN 1 ELSE 0 END) AS facturadas,
     SUM(CASE
         WHEN NOT EXISTS (SELECT 1 FROM facturas f WHERE f.ticket_id = t.id)
-         AND COALESCE(t.descripcion, '') LIKE '%Recibida manualmente%'
+         AND {$sqlManualFact}
         THEN 1 ELSE 0 END) AS recibidas_manual
 FROM ticket t
 {$filtroBaseSql}";
@@ -188,7 +190,7 @@ if ($filtro === 'facturadas') {
     $query .= ' AND EXISTS (SELECT 1 FROM facturas fx WHERE fx.ticket_id = t.id)';
 } elseif ($filtro === 'recibidas_manual') {
     $query .= " AND NOT EXISTS (SELECT 1 FROM facturas fx WHERE fx.ticket_id = t.id)
-                AND COALESCE(t.descripcion, '') LIKE '%Recibida manualmente%'";
+                AND {$sqlManualFact}";
 }
 
 $query .= ' ORDER BY t.fecha DESC, t.id DESC';

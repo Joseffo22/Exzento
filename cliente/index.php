@@ -27,11 +27,12 @@ if ($hora < 12) {
     $saludo = 'Buenas noches';
 }
 
+require_once('funciones/comercio_helpers.php');
+$sqlPendienteDash = exzento_sql_es_pendiente($conn);
 $query_metricas = "SELECT
-    SUM(CASE WHEN f.id IS NULL AND COALESCE(t.descripcion, '') NOT LIKE '%Recibida manualmente%' THEN 1 ELSE 0 END) AS pendientes,
-    SUM(CASE WHEN f.id IS NOT NULL THEN 1 ELSE 0 END) AS facturadas
+    SUM(CASE WHEN {$sqlPendienteDash} THEN 1 ELSE 0 END) AS pendientes,
+    SUM(CASE WHEN EXISTS (SELECT 1 FROM facturas fx WHERE fx.ticket_id = t.id) THEN 1 ELSE 0 END) AS facturadas
 FROM ticket t
-LEFT JOIN facturas f ON t.id = f.ticket_id
 WHERE t.id_cliente = ?";
 $stmt_metricas = $conn->prepare($query_metricas);
 $stmt_metricas->bind_param('s', $cliente_id);
@@ -42,10 +43,14 @@ $stmt_metricas->close();
 $pendientes = (int) ($metricas['pendientes'] ?? 0);
 $facturadas = (int) ($metricas['facturadas'] ?? 0);
 
+$sqlManualDash = exzento_sql_es_recibida_manual($conn);
 $query_recientes = "SELECT t.id, t.monto, t.fecha, t.descripcion,
-    CASE WHEN f.id IS NOT NULL THEN 'facturada' ELSE 'pendiente' END AS estado
+    CASE
+        WHEN EXISTS (SELECT 1 FROM facturas f WHERE f.ticket_id = t.id) THEN 'facturada'
+        WHEN {$sqlManualDash} THEN 'recibida_manual'
+        ELSE 'pendiente'
+    END AS estado
 FROM ticket t
-LEFT JOIN facturas f ON t.id = f.ticket_id
 WHERE t.id_cliente = ?
 ORDER BY t.fecha DESC
 LIMIT 5";
@@ -91,9 +96,15 @@ $conn->close();
             <ul class="dashboard-activity-list">
                 <?php foreach ($ticketsRecientes as $ticket): ?>
                 <?php
-                    $esFacturada = $ticket['estado'] === 'facturada';
-                    $titulo = $ticket['descripcion'] ?: ('Ticket #' . $ticket['id']);
+                    $estadoDash = $ticket['estado'];
+                    $titulo = exzento_limpiar_nombre_comercio($ticket['descripcion'] ?? '') ?: ('Ticket #' . $ticket['id']);
                     $fechaCorta = date('d/m/Y', strtotime($ticket['fecha']));
+                    $badgeClass = $estadoDash === 'facturada'
+                        ? 'dashboard-badge--done'
+                        : ($estadoDash === 'recibida_manual' ? 'dashboard-badge--pending' : 'dashboard-badge--pending');
+                    $badgeText = $estadoDash === 'facturada'
+                        ? 'Facturada'
+                        : ($estadoDash === 'recibida_manual' ? 'Manual' : 'Pendiente');
                 ?>
                 <li class="dashboard-activity-item">
                     <a href="/visualizar-ticket?id=<?= (int) $ticket['id'] ?>" class="dashboard-activity-link">
@@ -103,8 +114,8 @@ $conn->close();
                         </div>
                         <div class="dashboard-activity-right">
                             <div class="dashboard-activity-amount">$<?= number_format((float) $ticket['monto'], 2) ?></div>
-                            <span class="dashboard-badge <?= $esFacturada ? 'dashboard-badge--done' : 'dashboard-badge--pending' ?>">
-                                <?= $esFacturada ? 'Facturada' : 'Pendiente' ?>
+                            <span class="dashboard-badge <?= $badgeClass ?>">
+                                <?= $badgeText ?>
                             </span>
                         </div>
                     </a>

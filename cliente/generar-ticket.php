@@ -62,12 +62,41 @@ $result_metodos_pago =  $conn->query($query_metodos_pago);
                                    required
                                    autocomplete="off">
                             <datalist id="contactos-sugerencias"></datalist>
+                            <input type="hidden" name="id_contacto" id="id_contacto" value="">
                             <div class="invalid-feedback">
                                 Indica el comercio o una descripción del gasto
                             </div>
-                            <small class="form-text text-muted">
-                                Escribe el nombre del comercio o qué compraste. Tus contactos frecuentes aparecerán como sugerencias.
+                            <small class="form-text text-muted d-block mb-2">
+                                Escribe el nombre del comercio. Tus favoritos aparecerán como sugerencias.
                             </small>
+
+                            <div class="form-check mb-2">
+                                <input class="form-check-input"
+                                       type="checkbox"
+                                       value="1"
+                                       id="guardar_favorito"
+                                       name="guardar_favorito">
+                                <label class="form-check-label" for="guardar_favorito">
+                                    Guardar como comercio favorito
+                                </label>
+                            </div>
+
+                            <div id="favorito_campos" class="ticket-favorito-fields" hidden>
+                                <label for="telefono_comercio" class="form-label">Teléfono WhatsApp del comercio</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-phone" aria-hidden="true"></i></span>
+                                    <input type="tel"
+                                           class="form-control"
+                                           id="telefono_comercio"
+                                           name="telefono_comercio"
+                                           inputmode="tel"
+                                           placeholder="Ej. 5512345678"
+                                           autocomplete="tel">
+                                </div>
+                                <small class="form-text text-muted">
+                                    Así podrás reenviarle la solicitud desde Resumen o al compartir el ticket.
+                                </small>
+                            </div>
                         </div>
                     </div>
                 </section>
@@ -261,26 +290,69 @@ let fotoCapturada = null;
     })
 })()
 
-fetch('/funciones/ajax_obtener_contactos_frecuentes.php')
-    .then(response => response.json())
-    .then(data => {
-        if (!data.success || !data.contactos || !data.contactos.length) {
+(function () {
+    const contactosMap = {};
+    const datalist = document.getElementById('contactos-sugerencias');
+    const inputDesc = document.getElementById('descripcion');
+    const inputIdContacto = document.getElementById('id_contacto');
+    const inputTel = document.getElementById('telefono_comercio');
+    const checkFav = document.getElementById('guardar_favorito');
+    const favFields = document.getElementById('favorito_campos');
+
+    function toggleFavoritoFields() {
+        const on = checkFav.checked;
+        favFields.hidden = !on;
+        inputTel.required = on;
+        if (!on && !inputIdContacto.value) {
+            // no limpiar teléfono si ya venía de un favorito seleccionado
+        }
+    }
+
+    checkFav.addEventListener('change', toggleFavoritoFields);
+
+    function aplicarContactoPorNombre(nombre) {
+        const key = (nombre || '').trim().toLowerCase();
+        const contacto = contactosMap[key];
+        if (!contacto) {
+            inputIdContacto.value = '';
             return;
         }
-        const datalist = document.getElementById('contactos-sugerencias');
-        const vistos = new Set();
-        data.contactos.forEach(contacto => {
-            const nombre = (contacto.nombre_empresa || '').trim();
-            if (!nombre || vistos.has(nombre)) {
+        inputIdContacto.value = contacto.id || '';
+        if (contacto.telefono) {
+            inputTel.value = contacto.telefono;
+        }
+    }
+
+    inputDesc.addEventListener('change', function () {
+        aplicarContactoPorNombre(this.value);
+    });
+    inputDesc.addEventListener('blur', function () {
+        aplicarContactoPorNombre(this.value);
+    });
+
+    fetch('/funciones/ajax_obtener_contactos_frecuentes.php', { credentials: 'same-origin' })
+        .then(function (response) {
+            if (!response.ok) {
+                throw new Error('HTTP ' + response.status);
+            }
+            return response.json();
+        })
+        .then(function (data) {
+            if (!data || !data.success || !data.contactos || !data.contactos.length) {
                 return;
             }
-            vistos.add(nombre);
-            const option = document.createElement('option');
-            option.value = nombre;
-            datalist.appendChild(option);
-        });
-    })
-    .catch(() => {});
+            data.contactos.forEach(function (contacto) {
+                const nombre = (contacto.nombre_empresa || '').trim();
+                if (!nombre) return;
+                const key = nombre.toLowerCase();
+                contactosMap[key] = contacto;
+                const option = document.createElement('option');
+                option.value = nombre;
+                datalist.appendChild(option);
+            });
+        })
+        .catch(function () { /* silencioso: el ticket se puede generar sin favoritos */ });
+})();
 
 document.getElementById('rfc').addEventListener('input', function() {
     this.value = this.value.toUpperCase();

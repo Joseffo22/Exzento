@@ -12,49 +12,77 @@ if (session_status() === PHP_SESSION_NONE) {
 
 require_once(__DIR__ . '/../assets/php/conexiones/conexionMySqli.php');
 
-function buscarContactoFrecuente($telefono) {
+if (!function_exists('exzento_tabla_contactos_existe')) {
+    function exzento_tabla_contactos_existe(): bool
+    {
+        global $conn;
+        static $cache = null;
+        if ($cache !== null) {
+            return $cache;
+        }
+        if (!$conn) {
+            $cache = false;
+            return false;
+        }
+        try {
+            $res = $conn->query("SHOW TABLES LIKE 'contactosFrecuentes'");
+            $cache = $res && $res->num_rows > 0;
+        } catch (Throwable $e) {
+            $cache = false;
+        }
+        return $cache;
+    }
+}
+
+function buscarContactoFrecuente($telefono, $usuario_id = null) {
     global $conn;
-    
-    if (!$conn) {
+
+    if (!$conn || !exzento_tabla_contactos_existe()) {
         return null;
     }
-    
-    // Limpiar y formatear el teléfono
+
+    if (!$usuario_id && isset($_SESSION['id_usuario'])) {
+        $usuario_id = $_SESSION['id_usuario'];
+    }
+
     $telefono = limpiarTelefono($telefono);
-    
-    // Buscar en la tabla de contactos frecuentes
-    $query = "SELECT 
-                    id,
-                    nombre_empresa,
-                    telefono,
-                    categoria,
-                    notas
-                FROM contactosFrecuentes 
-                WHERE telefono = ?
-                AND estatus = 1
-                LIMIT 1";
-    
-    $stmt = $conn->prepare($query);
-    if (!$stmt) {
+    if ($telefono === '') {
         return null;
     }
-    
-    $stmt->bind_param("s", $telefono);
+
+    if ($usuario_id) {
+        $query = "SELECT id, nombre_empresa, telefono, categoria, notas
+                  FROM contactosFrecuentes
+                  WHERE telefono = ? AND estatus = 1 AND creado_por = ?
+                  LIMIT 1";
+        $stmt = $conn->prepare($query);
+        if (!$stmt) {
+            return null;
+        }
+        $uid = (int) $usuario_id;
+        $stmt->bind_param('si', $telefono, $uid);
+    } else {
+        $query = "SELECT id, nombre_empresa, telefono, categoria, notas
+                  FROM contactosFrecuentes
+                  WHERE telefono = ? AND estatus = 1
+                  LIMIT 1";
+        $stmt = $conn->prepare($query);
+        if (!$stmt) {
+            return null;
+        }
+        $stmt->bind_param('s', $telefono);
+    }
+
     $stmt->execute();
     $result = $stmt->get_result();
-    
-    if ($result->num_rows > 0) {
+
+    if ($result && $result->num_rows > 0) {
         $contacto = $result->fetch_assoc();
-        
-        // Actualizar frecuencia de uso
+        $stmt->close();
         actualizarFrecuenciaContacto($contacto['id']);
-        
-        // Registrar en historial
-        registrarUsoContacto($contacto['id'], $contacto);
-        
         return $contacto;
     }
-    
+
     $stmt->close();
     return null;
 }
@@ -101,24 +129,30 @@ function actualizarFrecuenciaContacto($contacto_id) {
 /**
  * Función para registrar el uso de un contacto en el historial
  */
-function registrarUsoContacto($contacto_id, $datos_usados) {
+function registrarUsoContacto($contacto_id, $datos_usados, $id_ticket = null) {
     global $conn;
-    
-    // Solo registrar si el usuario está logueado
-    if (!isset($_SESSION['id_usuario'])) {
+
+    if (!isset($_SESSION['id_usuario']) || !exzento_tabla_contactos_existe()) {
         return;
     }
-    
-    $query = "INSERT INTO historialContactos 
-              (id_contacto, id_ticket, id_usuario, datos_usados) 
-              VALUES (?, NULL, ?, ?)";
-    
+
+    // historialContactos.id_ticket es NOT NULL en algunos esquemas: solo registrar con ticket
+    if ($id_ticket === null || (int) $id_ticket <= 0) {
+        return;
+    }
+
+    $query = "INSERT INTO historialContactos
+              (id_contacto, id_ticket, id_usuario, datos_usados)
+              VALUES (?, ?, ?, ?)";
+
     $stmt = $conn->prepare($query);
     if ($stmt) {
-        $datos_json = json_encode($datos_usados);
-        $usuario_id = $_SESSION['id_usuario'];
-        $stmt->bind_param("iis", $contacto_id, $usuario_id, $datos_json);
-        $stmt->execute();
+        $datos_json = json_encode($datos_usados, JSON_UNESCAPED_UNICODE);
+        $usuario_id = (int) $_SESSION['id_usuario'];
+        $contacto_id = (int) $contacto_id;
+        $id_ticket = (int) $id_ticket;
+        $stmt->bind_param('iiis', $contacto_id, $id_ticket, $usuario_id, $datos_json);
+        @$stmt->execute();
         $stmt->close();
     }
 }
@@ -128,42 +162,90 @@ function registrarUsoContacto($contacto_id, $datos_usados) {
  */
 function obtenerContactosFrecuentesUsuario($usuario_id = null) {
     global $conn;
-    
+
     if (!$usuario_id && isset($_SESSION['id_usuario'])) {
         $usuario_id = $_SESSION['id_usuario'];
     }
-    
-    if (!$usuario_id) {
+
+    if (!$usuario_id || !$conn || !exzento_tabla_contactos_existe()) {
         return [];
     }
-    
-    $query = "SELECT 
-                    cf.*,
-                    COUNT(hc.id) as total_usos,
-                    MAX(hc.fecha_uso) as ultimo_uso_real
-                FROM contactosFrecuentes cf
-                LEFT JOIN historialContactos hc ON cf.id = hc.id_contacto 
-                    AND hc.id_usuario = ?
-                WHERE cf.estatus = 1
-                GROUP BY cf.id
-                ORDER BY cf.frecuencia_uso DESC, cf.ultimo_uso DESC";
-    
+
+    $usuario_id = (int) $usuario_id;
+
+    // Solo contactos del usuario; consulta simple para evitar errores de GROUP BY / JSON
+    $query = "SELECT
+                    cf.id,
+                    cf.nombre_empresa,
+                    cf.telefono,
+                    cf.categoria,
+                    cf.notas,
+                    cf.frecuencia_uso,
+                    cf.ultimo_uso,
+                    cf.creado_por
+              FROM contactosFrecuentes cf
+              WHERE cf.estatus = 1
+                AND cf.creado_por = ?
+              ORDER BY cf.frecuencia_uso DESC, cf.ultimo_uso DESC, cf.nombre_empresa ASC";
+
     $stmt = $conn->prepare($query);
     if (!$stmt) {
         return [];
     }
-    
-    $stmt->bind_param("i", $usuario_id);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    
-    $contactos = [];
-    while ($row = $result->fetch_assoc()) {
-        $contactos[] = $row;
+
+    $stmt->bind_param('i', $usuario_id);
+    if (!$stmt->execute()) {
+        $stmt->close();
+        return [];
     }
-    
+
+    $result = $stmt->get_result();
+    $contactos = [];
+    if ($result) {
+        while ($row = $result->fetch_assoc()) {
+            $contactos[] = $row;
+        }
+    }
+
     $stmt->close();
     return $contactos;
+}
+
+/**
+ * Busca un contacto del usuario por nombre de comercio (coincide exacta, case-insensitive).
+ */
+function buscarContactoPorNombre($nombre, $usuario_id = null) {
+    global $conn;
+
+    if (!$usuario_id && isset($_SESSION['id_usuario'])) {
+        $usuario_id = $_SESSION['id_usuario'];
+    }
+
+    $nombre = trim((string) $nombre);
+    if ($nombre === '' || !$usuario_id || !$conn || !exzento_tabla_contactos_existe()) {
+        return null;
+    }
+
+    $usuario_id = (int) $usuario_id;
+    $query = "SELECT id, nombre_empresa, telefono, categoria, notas
+              FROM contactosFrecuentes
+              WHERE estatus = 1
+                AND creado_por = ?
+                AND LOWER(TRIM(nombre_empresa)) = LOWER(?)
+              LIMIT 1";
+
+    $stmt = $conn->prepare($query);
+    if (!$stmt) {
+        return null;
+    }
+
+    $stmt->bind_param('is', $usuario_id, $nombre);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $contacto = $result ? $result->fetch_assoc() : null;
+    $stmt->close();
+
+    return $contacto ?: null;
 }
 
 /**
@@ -171,71 +253,95 @@ function obtenerContactosFrecuentesUsuario($usuario_id = null) {
  */
 function agregarContactoFrecuente($datos) {
     global $conn;
-    
+
     if (!isset($_SESSION['id_usuario'])) {
         return ['success' => false, 'message' => 'Usuario no autenticado'];
     }
-    
-    // Validar datos requeridos
-    if (empty($datos['nombre_empresa']) || empty($datos['telefono'])) {
-        return ['success' => false, 'message' => 'Nombre de empresa y teléfono son requeridos'];
+
+    if (!$conn || !exzento_tabla_contactos_existe()) {
+        return ['success' => false, 'message' => 'Contactos frecuentes no disponibles'];
     }
-    
-    // Limpiar teléfono
+
+    if (empty($datos['nombre_empresa']) || empty($datos['telefono'])) {
+        return ['success' => false, 'message' => 'Nombre de comercio y teléfono son requeridos'];
+    }
+
     $telefono = limpiarTelefono($datos['telefono']);
-    
-    // Verificar si ya existe un contacto con ese teléfono
-    $query = "SELECT id FROM contactosFrecuentes WHERE telefono = ? AND estatus = 1";
+    if (strlen($telefono) < 7) {
+        return ['success' => false, 'message' => 'Teléfono inválido'];
+    }
+
+    $usuario_id = (int) $_SESSION['id_usuario'];
+    $nombre_empresa = trim((string) $datos['nombre_empresa']);
+
+    // Si ya existe para este usuario (mismo teléfono), reutilizarlo
+    $query = "SELECT id FROM contactosFrecuentes
+              WHERE telefono = ? AND creado_por = ? AND estatus = 1
+              LIMIT 1";
     $stmt = $conn->prepare($query);
     if ($stmt) {
-        $stmt->bind_param("s", $telefono);
+        $stmt->bind_param('si', $telefono, $usuario_id);
         $stmt->execute();
         $result = $stmt->get_result();
-        
-        if ($result->num_rows > 0) {
+        if ($result && $result->num_rows > 0) {
+            $existente = $result->fetch_assoc();
             $stmt->close();
-            return ['success' => false, 'message' => 'Ya existe un contacto con ese número de teléfono'];
+            $contacto_id = (int) $existente['id'];
+            // Actualizar nombre si cambió
+            $upd = $conn->prepare(
+                "UPDATE contactosFrecuentes SET nombre_empresa = ?, ultimo_uso = NOW() WHERE id = ? AND creado_por = ?"
+            );
+            if ($upd) {
+                $upd->bind_param('sii', $nombre_empresa, $contacto_id, $usuario_id);
+                $upd->execute();
+                $upd->close();
+            }
+            actualizarFrecuenciaContacto($contacto_id);
+            return [
+                'success' => true,
+                'message' => 'Comercio favorito actualizado',
+                'contacto_id' => $contacto_id,
+                'existente' => true,
+            ];
         }
         $stmt->close();
     }
-    
-    // Insertar nuevo contacto
-    $query = "INSERT INTO contactosFrecuentes 
-              (nombre_empresa, telefono, categoria, notas, creado_por) 
-              VALUES (?, ?, ?, ?, ?)";
-    
+
+    $categoria = $datos['categoria'] ?? null;
+    $notas = $datos['notas'] ?? null;
+
+    $query = "INSERT INTO contactosFrecuentes
+              (nombre_empresa, telefono, categoria, notas, creado_por, frecuencia_uso, ultimo_uso)
+              VALUES (?, ?, ?, ?, ?, 1, NOW())";
+
     $stmt = $conn->prepare($query);
     if (!$stmt) {
         return ['success' => false, 'message' => 'Error al preparar la consulta'];
     }
-    
-    // Crear variables locales para evitar problemas de referencia
-    $nombre_empresa = $datos['nombre_empresa'];
-    $categoria = $datos['categoria'] ?? null;
-    $notas = $datos['notas'] ?? null;
-    $usuario_id = $_SESSION['id_usuario'];
-    
-    $stmt->bind_param("ssssi", 
+
+    $stmt->bind_param(
+        'ssssi',
         $nombre_empresa,
         $telefono,
         $categoria,
         $notas,
         $usuario_id
     );
-    
+
     if ($stmt->execute()) {
-        $contacto_id = $conn->insert_id;
+        $contacto_id = (int) $conn->insert_id;
         $stmt->close();
-        
         return [
-            'success' => true, 
-            'message' => 'Contacto agregado exitosamente',
-            'contacto_id' => $contacto_id
+            'success' => true,
+            'message' => 'Comercio guardado como favorito',
+            'contacto_id' => $contacto_id,
+            'existente' => false,
         ];
-    } else {
-        $stmt->close();
-        return ['success' => false, 'message' => 'Error al insertar el contacto'];
     }
+
+    $error = $stmt->error;
+    $stmt->close();
+    return ['success' => false, 'message' => 'Error al guardar el comercio: ' . $error];
 }
 
 /**

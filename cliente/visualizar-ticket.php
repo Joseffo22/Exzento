@@ -481,33 +481,61 @@ $conn->close();
         msg.classList.remove('d-none');
     }
 
+    const comercioTicketActual = <?= json_encode(
+        trim(preg_replace(
+            '/\s*[-–—]?\s*Recibida manualmente el\s+.+$/iu',
+            '',
+            (string) ($datos['descripcion'] ?? '')
+        )),
+        JSON_UNESCAPED_UNICODE
+    ) ?>;
+
     function cargarContactosFrecuentes() {
         const select = document.getElementById('contactoFrecuente');
         select.innerHTML = '<option value="">Cargando contactos…</option>';
 
-        fetch('/funciones/ajax_obtener_contactos_frecuentes.php')
-            .then(response => response.json())
-            .then(data => {
-                select.innerHTML = '<option value="">Selecciona un contacto frecuente…</option>';
+        fetch('/funciones/ajax_obtener_contactos_frecuentes.php', { credentials: 'same-origin' })
+            .then(function (response) {
+                const ctype = (response.headers.get('content-type') || '');
+                if (!response.ok || ctype.indexOf('application/json') === -1) {
+                    throw new Error('Respuesta inválida');
+                }
+                return response.json();
+            })
+            .then(function (data) {
+                select.innerHTML = '<option value="">Selecciona un comercio favorito…</option>';
 
-                if (!data.success) {
+                if (!data || !data.success) {
                     select.innerHTML = '<option value="">No se pudieron cargar los contactos</option>';
                     return;
                 }
 
                 if (!data.contactos || data.contactos.length === 0) {
-                    select.innerHTML = '<option value="">No tienes contactos frecuentes aún</option>';
+                    select.innerHTML = '<option value="">No tienes comercios favoritos aún</option>';
                     return;
                 }
 
-                data.contactos.forEach(contacto => {
+                let matchTel = '';
+                const comercioKey = (comercioTicketActual || '').trim().toLowerCase();
+
+                data.contactos.forEach(function (contacto) {
                     const option = document.createElement('option');
-                    option.value = contacto.telefono;
-                    option.textContent = `${contacto.nombre_empresa} (${contacto.telefono})`;
+                    option.value = contacto.telefono || '';
+                    option.textContent = (contacto.nombre_empresa || 'Comercio') +
+                        (contacto.telefono ? ' (' + contacto.telefono + ')' : '');
                     select.appendChild(option);
+
+                    if (comercioKey && (contacto.nombre_empresa || '').trim().toLowerCase() === comercioKey) {
+                        matchTel = contacto.telefono || '';
+                    }
                 });
+
+                if (matchTel) {
+                    select.value = matchTel;
+                    seleccionarContactoFrecuente();
+                }
             })
-            .catch(error => {
+            .catch(function (error) {
                 console.error('Error al cargar contactos frecuentes:', error);
                 select.innerHTML = '<option value="">Error al cargar contactos</option>';
             });

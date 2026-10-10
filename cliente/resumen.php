@@ -1,8 +1,12 @@
 <?php
 require_once('assets/php/conexiones/conexionMySqli.php');
 require_once('funciones/mensaje_whatsapp_factura.php');
+require_once('funciones/comercio_helpers.php');
 
 $cliente_id = $_SESSION['id_usuario'];
+$sqlManual = exzento_sql_es_recibida_manual($conn);
+$sqlPendiente = exzento_sql_es_pendiente($conn);
+$sqlFacturado = "(EXISTS (SELECT 1 FROM facturas f WHERE f.ticket_id = t.id) OR {$sqlManual})";
 
 $mesesEs = [
     1 => 'Enero', 2 => 'Febrero', 3 => 'Marzo', 4 => 'Abril',
@@ -79,21 +83,13 @@ $queryTotales = "SELECT
     COALESCE(SUM(CAST(t.monto AS DECIMAL(12,2))), 0) AS total_monto,
     COUNT(*) AS total_tickets,
     COALESCE(SUM(CASE
-        WHEN EXISTS (SELECT 1 FROM facturas f WHERE f.ticket_id = t.id)
-          OR COALESCE(t.descripcion, '') LIKE '%Recibida manualmente%'
+        WHEN {$sqlFacturado}
         THEN CAST(t.monto AS DECIMAL(12,2)) ELSE 0 END), 0) AS monto_facturado,
     COALESCE(SUM(CASE
-        WHEN NOT EXISTS (SELECT 1 FROM facturas f WHERE f.ticket_id = t.id)
-          AND COALESCE(t.descripcion, '') NOT LIKE '%Recibida manualmente%'
+        WHEN {$sqlPendiente}
         THEN CAST(t.monto AS DECIMAL(12,2)) ELSE 0 END), 0) AS monto_pendiente,
-    SUM(CASE
-        WHEN EXISTS (SELECT 1 FROM facturas f WHERE f.ticket_id = t.id)
-          OR COALESCE(t.descripcion, '') LIKE '%Recibida manualmente%'
-        THEN 1 ELSE 0 END) AS count_facturado,
-    SUM(CASE
-        WHEN NOT EXISTS (SELECT 1 FROM facturas f WHERE f.ticket_id = t.id)
-          AND COALESCE(t.descripcion, '') NOT LIKE '%Recibida manualmente%'
-        THEN 1 ELSE 0 END) AS count_pendiente
+    SUM(CASE WHEN {$sqlFacturado} THEN 1 ELSE 0 END) AS count_facturado,
+    SUM(CASE WHEN {$sqlPendiente} THEN 1 ELSE 0 END) AS count_pendiente
 FROM ticket t
 WHERE t.id_cliente = ?
   AND MONTH(t.fecha) = ?
@@ -151,8 +147,7 @@ LEFT JOIN empresas e ON t.id_empresa = e.id
 WHERE t.id_cliente = ?
   AND MONTH(t.fecha) = ?
   AND YEAR(t.fecha) = ?
-  AND NOT EXISTS (SELECT 1 FROM facturas f WHERE f.ticket_id = t.id)
-  AND COALESCE(t.descripcion, '') NOT LIKE '%Recibida manualmente%'
+  AND {$sqlPendiente}
   {$filtroCuentaSql}
 ORDER BY t.fecha ASC, t.id ASC";
 

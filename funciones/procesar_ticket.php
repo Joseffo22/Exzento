@@ -1,6 +1,8 @@
 <?php
 session_start();
 require_once('../assets/php/conexiones/conexionMySqli.php');
+require_once(__DIR__ . '/buscar_contacto_frecuente.php');
+require_once(__DIR__ . '/comercio_helpers.php');
 
 // Verificar si el usuario está logueado
 if (!isset($_SESSION['id_usuario'])) {
@@ -150,6 +152,48 @@ try {
 
     $idTicket = $stmt->insert_id;
     $stmt->close();
+
+    // Vincular / guardar comercio favorito (contactos frecuentes)
+    $nombreComercio = exzento_limpiar_nombre_comercio($descripcion);
+    $idContacto = isset($_POST['id_contacto']) ? (int) $_POST['id_contacto'] : 0;
+    $guardarFavorito = !empty($_POST['guardar_favorito']);
+    $telefonoComercio = trim((string) ($_POST['telefono_comercio'] ?? ''));
+
+    $contactoUsado = null;
+    if ($idContacto > 0) {
+        $misContactos = obtenerContactosFrecuentesUsuario($_SESSION['id_usuario']);
+        foreach ($misContactos as $c) {
+            if ((int) $c['id'] === $idContacto) {
+                $contactoUsado = $c;
+                break;
+            }
+        }
+    }
+
+    if (!$contactoUsado && $nombreComercio !== '') {
+        $contactoUsado = buscarContactoPorNombre($nombreComercio, $_SESSION['id_usuario']);
+    }
+
+    if ($guardarFavorito && $telefonoComercio !== '' && $nombreComercio !== '') {
+        $resultadoFav = agregarContactoFrecuente([
+            'nombre_empresa' => $nombreComercio,
+            'telefono' => $telefonoComercio,
+            'categoria' => 'Comercio',
+            'notas' => 'Guardado al generar ticket #' . $idTicket,
+        ]);
+        if (!empty($resultadoFav['success']) && !empty($resultadoFav['contacto_id'])) {
+            $contactoUsado = [
+                'id' => (int) $resultadoFav['contacto_id'],
+                'nombre_empresa' => $nombreComercio,
+                'telefono' => limpiarTelefono($telefonoComercio),
+            ];
+        }
+    }
+
+    if ($contactoUsado && !empty($contactoUsado['id'])) {
+        actualizarFrecuenciaContacto((int) $contactoUsado['id']);
+        registrarUsoContacto((int) $contactoUsado['id'], $contactoUsado, $idTicket);
+    }
 
     // Redirigir al usuario con mensaje de éxito
     $_SESSION['mensaje'] = [
