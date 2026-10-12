@@ -8,7 +8,7 @@ declare(strict_types=1);
 
 const DOF_BASE = 'https://dof.gob.mx';
 const DOF_URL  = 'https://dof.gob.mx/';
-const NEW_URL  = 'https://dofversioncasa.com/';
+const NEW_URL  = 'https://exzento.com/dofversioncasa.php/';
 
 function dof_fetch(string $url): array
 {
