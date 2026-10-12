@@ -331,8 +331,10 @@ function h(string $s): string
     a { color: inherit; }
 
     .wrap {
-      width: min(1180px, calc(100% - 2rem));
-      margin: 0 auto;
+      width: 100%;
+      max-width: none;
+      margin: 0;
+      padding: 0 clamp(1rem, 2.2vw, 2.5rem);
       position: relative;
       z-index: 1;
     }
@@ -440,18 +442,18 @@ function h(string $s): string
     .hero h1 {
       margin: 0 0 0.55rem;
       font-family: var(--font-display);
-      font-size: clamp(2.1rem, 5vw, 3.6rem);
+      font-size: clamp(2.1rem, 4.5vw, 3.8rem);
       line-height: 1.05;
       letter-spacing: -0.03em;
       font-weight: 700;
-      max-width: 14ch;
+      max-width: none;
     }
 
     .hero p {
       margin: 0;
-      max-width: 38rem;
+      max-width: 52rem;
       color: rgba(244,240,230,0.84);
-      font-size: 1.02rem;
+      font-size: 1.05rem;
       line-height: 1.55;
     }
 
@@ -476,7 +478,7 @@ function h(string $s): string
 
     .metrics {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      grid-template-columns: repeat(7, minmax(0, 1fr));
       gap: 0.75rem;
       margin: 1.4rem 0 0.4rem;
       opacity: 0;
@@ -517,11 +519,12 @@ function h(string $s): string
 
     .layout {
       display: grid;
-      grid-template-columns: minmax(0, 1.7fr) minmax(280px, 0.9fr);
+      grid-template-columns: minmax(0, 1fr) 340px;
       gap: 1.25rem;
       padding: 0.4rem 0 3rem;
       opacity: 0;
       animation: rise 0.85s ease 0.24s forwards;
+      align-items: start;
     }
 
     .panel {
@@ -790,12 +793,23 @@ function h(string $s): string
       to { opacity: 1; transform: translateY(0); }
     }
 
+    @media (max-width: 1200px) {
+      .metrics { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+      .layout { grid-template-columns: minmax(0, 1fr) 300px; }
+    }
+
     @media (max-width: 920px) {
+      .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .layout { grid-template-columns: 1fr; }
       .panel-head { flex-direction: column; align-items: stretch; }
       .search { width: 100%; }
       .note { grid-template-columns: auto 1fr; }
       .note-link { display: none; }
+    }
+
+    @media (max-width: 560px) {
+      .metrics { grid-template-columns: 1fr 1fr; }
+      .wrap { padding: 0 0.85rem; }
     }
   </style>
 </head>
