@@ -246,6 +246,126 @@ function dof_parse(string $rawHtml): array
     return $data;
 }
 
+function h(string $s): string
+{
+    return htmlspecialchars($s, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+}
+
+function dof_clean_nota_html(string $html): string
+{
+    $html = preg_replace('#<(script|style|iframe|object|embed)[^>]*>.*?</\1>#is', '', $html) ?? $html;
+    $html = preg_replace('#</?(html|head|body|meta|link|!DOCTYPE)[^>]*>#is', '', $html) ?? $html;
+    $html = preg_replace_callback(
+        '/\s(src|href)=([\'"])([^\'"]*)\2/i',
+        static function (array $m): string {
+            return ' ' . $m[1] . '=' . $m[2] . dof_abs($m[3]) . $m[2];
+        },
+        $html
+    ) ?? $html;
+
+    return trim($html);
+}
+
+function dof_parse_nota(string $rawHtml): array
+{
+    $html = @mb_convert_encoding($rawHtml, 'UTF-8', 'ISO-8859-1');
+    if ($html === false || $html === '') {
+        $html = $rawHtml;
+    }
+
+    $title = '';
+    $fecha = '';
+    $body = '';
+
+    if (preg_match('/DOF:\s*([0-9]{2}\/[0-9]{2}\/[0-9]{4})/i', $html, $m)) {
+        $fecha = $m[1];
+    }
+
+    if (preg_match('/id=[\'"]DivDetalleNota[\'"][^>]*>(.*?)<\/div>\s*<br\s*\/?>\s*<table/is', $html, $m)
+        || preg_match('/id=[\'"]DivDetalleNota[\'"][^>]*>(.*)/is', $html, $m)
+    ) {
+        $chunk = $m[1];
+        if (preg_match('/<body[^>]*>(.*?)<\/body>/is', $chunk, $bm)) {
+            $chunk = $bm[1];
+        }
+        if (preg_match('/<h1[^>]*>(.*?)<\/h1>/is', $chunk, $tm)) {
+            $title = dof_text($tm[1]);
+        }
+        $body = dof_clean_nota_html($chunk);
+    }
+
+    if ($title === '' && preg_match_all('/<title>(.*?)<\/title>/is', $html, $tm) && count($tm[1]) > 1) {
+        $title = dof_text($tm[1][count($tm[1]) - 1]);
+    }
+
+    if ($body === '' && preg_match('/<body[^>]*>(.*?)<\/body>/is', $html, $bm)) {
+        $body = dof_clean_nota_html($bm[1]);
+    }
+
+    return [
+        'title' => $title !== '' ? $title : 'Nota del DOF',
+        'fecha' => $fecha,
+        'body'  => $body,
+    ];
+}
+
+// Endpoint AJAX: carga una nota para el modal
+if (isset($_GET['ajax']) && $_GET['ajax'] === 'nota') {
+    header('Content-Type: application/json; charset=utf-8');
+    header('Cache-Control: no-store');
+
+    $codigo = isset($_GET['codigo']) ? preg_replace('/\D+/', '', (string) $_GET['codigo']) : '';
+    $fecha = isset($_GET['fecha']) ? (string) $_GET['fecha'] : '';
+    $urlIn = isset($_GET['url']) ? (string) $_GET['url'] : '';
+
+    if ($codigo !== '') {
+        if ($fecha === '' || !preg_match('#^\d{2}/\d{2}/\d{4}$#', $fecha)) {
+            $fecha = date('d/m/Y');
+        }
+        $url = DOF_BASE . '/nota_detalle.php?codigo=' . rawurlencode($codigo) . '&fecha=' . rawurlencode($fecha);
+    } elseif ($urlIn !== '') {
+        $parts = parse_url($urlIn);
+        $host = isset($parts['host']) ? strtolower($parts['host']) : '';
+        if ($host !== '' && $host !== 'dof.gob.mx' && $host !== 'www.dof.gob.mx') {
+            http_response_code(400);
+            echo json_encode(['ok' => false, 'error' => 'URL no permitida'], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+        $url = dof_abs($urlIn);
+        if (preg_match('/codigo=(\d+)/', $url, $cm)) {
+            $codigo = $cm[1];
+        }
+        if (preg_match('/fecha=([^&]+)/', $url, $fm)) {
+            $fecha = urldecode($fm[1]);
+        }
+    } else {
+        http_response_code(400);
+        echo json_encode(['ok' => false, 'error' => 'Falta código o URL'], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+
+    list($html, $httpCode, $error) = dof_fetch($url);
+    if ($html === false || $httpCode >= 400) {
+        http_response_code(502);
+        echo json_encode([
+            'ok'    => false,
+            'error' => $error !== '' ? $error : ('HTTP ' . $httpCode),
+        ], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+
+    $nota = dof_parse_nota($html);
+    echo json_encode([
+        'ok'     => true,
+        'title'  => $nota['title'],
+        'fecha'  => $nota['fecha'] !== '' ? $nota['fecha'] : $fecha,
+        'codigo' => $codigo,
+        'source' => $url,
+        'body'   => $nota['body'],
+    ], JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
 [$html, $httpCode, $error] = dof_fetch(DOF_URL);
 
 if ($html === false || $httpCode >= 400) {
@@ -271,10 +391,6 @@ foreach ($dof['secciones'] as $deps) {
     }
 }
 
-function h(string $s): string
-{
-    return htmlspecialchars($s, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
-}
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -284,7 +400,7 @@ function h(string $s): string
   <title>DOF · <?= h($fechaLabel) ?></title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,400;7..72,500;7..72,600;7..72,700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
       --ink: #12241c;
@@ -298,8 +414,9 @@ function h(string $s): string
       --glow: rgba(31, 107, 74, 0.18);
       --radius: 18px;
       --shadow: 0 18px 50px rgba(15, 40, 28, 0.12);
-      --font-display: "Fraunces", Georgia, serif;
-      --font-body: "Manrope", system-ui, sans-serif;
+      --font-display: "Literata", "Source Serif 4", Georgia, serif;
+      --font-body: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+      --font-read: "Literata", Georgia, serif;
     }
 
     * { box-sizing: border-box; }
@@ -674,9 +791,11 @@ function h(string $s): string
 
     .note-title {
       margin: 0;
-      font-size: 0.95rem;
-      line-height: 1.45;
+      font-family: var(--font-read);
+      font-size: 1.02rem;
+      line-height: 1.55;
       font-weight: 500;
+      letter-spacing: 0.005em;
     }
 
     .note-code {
@@ -745,8 +864,9 @@ function h(string $s): string
 
     .hot-item p {
       margin: 0;
-      font-size: 0.88rem;
-      line-height: 1.4;
+      font-family: var(--font-read);
+      font-size: 0.95rem;
+      line-height: 1.5;
       font-weight: 500;
     }
 
@@ -810,6 +930,185 @@ function h(string $s): string
     @media (max-width: 560px) {
       .metrics { grid-template-columns: 1fr 1fr; }
       .wrap { padding: 0 0.85rem; }
+    }
+
+    /* Modal de nota */
+    .modal-root {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      display: none;
+      align-items: stretch;
+      justify-content: center;
+      padding: clamp(0.75rem, 2vw, 1.5rem);
+    }
+    .modal-root.open { display: flex; }
+    .modal-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(10, 28, 20, 0.58);
+      backdrop-filter: blur(6px);
+      animation: fadeIn 0.2s ease;
+    }
+    .modal-dialog {
+      position: relative;
+      z-index: 1;
+      width: min(980px, 100%);
+      max-height: 100%;
+      display: flex;
+      flex-direction: column;
+      border-radius: calc(var(--radius) + 6px);
+      background: linear-gradient(180deg, #fbf8f1 0%, #f3efe6 100%);
+      border: 1px solid rgba(255,255,255,0.35);
+      box-shadow: 0 30px 80px rgba(8, 28, 18, 0.35);
+      overflow: hidden;
+      animation: modalIn 0.28s ease;
+    }
+    .modal-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 1.15rem 1.25rem 1rem;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255,255,255,0.45);
+    }
+    .modal-kicker {
+      margin: 0 0 0.35rem;
+      font-size: 0.72rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--ink-soft);
+      font-weight: 700;
+    }
+    .modal-title {
+      margin: 0;
+      font-family: var(--font-read);
+      font-size: clamp(1.2rem, 2.4vw, 1.6rem);
+      line-height: 1.35;
+      letter-spacing: -0.01em;
+      font-weight: 600;
+      color: var(--leaf-deep);
+      max-width: 48rem;
+    }
+    .modal-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+      margin-top: 0.7rem;
+    }
+    .modal-meta span,
+    .modal-meta a {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.28rem 0.65rem;
+      border-radius: 999px;
+      background: rgba(15, 61, 44, 0.08);
+      color: var(--ink-soft);
+      font-size: 0.78rem;
+      font-weight: 600;
+      text-decoration: none;
+    }
+    .modal-meta a:hover { background: rgba(15, 61, 44, 0.14); color: var(--leaf-deep); }
+    .modal-close {
+      flex-shrink: 0;
+      width: 2.4rem;
+      height: 2.4rem;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.8);
+      color: var(--ink);
+      font-size: 1.25rem;
+      line-height: 1;
+      cursor: pointer;
+      transition: background 0.2s ease, transform 0.2s ease;
+    }
+    .modal-close:hover { background: #fff; transform: scale(1.04); }
+    .modal-body {
+      overflow: auto;
+      padding: 1.25rem clamp(1rem, 3vw, 2rem) 2rem;
+      flex: 1;
+    }
+    .modal-body.loading,
+    .modal-body.error {
+      display: grid;
+      place-items: center;
+      min-height: 220px;
+      color: var(--ink-soft);
+      font-weight: 600;
+    }
+    .modal-content {
+      max-width: 42rem;
+      margin: 0 auto;
+      color: var(--ink);
+      font-family: var(--font-read);
+      font-size: 1.125rem;
+      line-height: 1.8;
+      font-weight: 400;
+      letter-spacing: 0.01em;
+      font-optical-sizing: auto;
+    }
+    .modal-content h1,
+    .modal-content h2,
+    .modal-content .Titulo_1,
+    .modal-content .Titulo_2 {
+      font-family: var(--font-read);
+      color: var(--leaf-deep);
+      border: 0 !important;
+      margin: 0 0 1rem;
+      line-height: 1.4;
+      font-size: 1.35rem;
+      font-weight: 700;
+      text-indent: 0 !important;
+      letter-spacing: -0.01em;
+    }
+    .modal-content h2,
+    .modal-content .Titulo_2 {
+      font-size: 1.08rem;
+      color: var(--ink-soft);
+      font-weight: 600;
+      margin-bottom: 1.35rem;
+      padding-bottom: 0.9rem;
+      border-bottom: 1px solid var(--line) !important;
+    }
+    .modal-content .Texto,
+    .modal-content p,
+    .modal-content div {
+      margin: 0 0 1.1rem;
+      text-align: justify;
+      hyphens: auto;
+      text-indent: 0 !important;
+      font-family: var(--font-read) !important;
+      font-size: 1.125rem !important;
+      line-height: 1.8 !important;
+      font-weight: 400 !important;
+      letter-spacing: 0.01em !important;
+    }
+    .modal-content span {
+      font-family: inherit !important;
+      font-size: inherit !important;
+      line-height: inherit !important;
+      letter-spacing: inherit !important;
+    }
+    .modal-content table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+      font-size: 0.95rem;
+    }
+    .modal-content td,
+    .modal-content th {
+      border: 1px solid var(--line);
+      padding: 0.45rem 0.6rem;
+    }
+    body.modal-open { overflow: hidden; }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes modalIn {
+      from { opacity: 0; transform: translateY(18px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
     }
   </style>
 </head>
@@ -884,10 +1183,16 @@ function h(string $s): string
                   <div class="dep" data-dep="<?= h($dep) ?>">
                     <h4 class="dep-title"><?= h($dep) ?></h4>
                     <?php foreach ($notas as $nota): ?>
-                      <a class="note"
+                      <?php
+                        $notaFecha = '';
+                        if (preg_match('/fecha=([^&]+)/', $nota['url'], $fm)) {
+                            $notaFecha = urldecode(html_entity_decode($fm[1]));
+                        }
+                      ?>
+                      <a class="note js-dof-modal"
                          href="<?= h($nota['url']) ?>"
-                         target="_blank"
-                         rel="noopener"
+                         data-codigo="<?= h($nota['codigo']) ?>"
+                         data-fecha="<?= h($notaFecha) ?>"
                          data-text="<?= h(mb_strtolower($nota['title'] . ' ' . $dep . ' ' . $poder, 'UTF-8')) ?>">
                         <span class="note-num"><?= $i++ ?></span>
                         <span>
@@ -896,7 +1201,7 @@ function h(string $s): string
                             <div class="note-code">Código <?= h($nota['codigo']) ?></div>
                           <?php endif; ?>
                         </span>
-                        <span class="note-link">Abrir ↗</span>
+                        <span class="note-link">Leer</span>
                       </a>
                     <?php endforeach; ?>
                   </div>
@@ -928,7 +1233,24 @@ function h(string $s): string
                 <div class="empty">Sin datos de <?= h(mb_strtolower($label, 'UTF-8')) ?>.</div>
               <?php else: ?>
                 <?php foreach ($dof['destacados'][$key] as $item): ?>
-                  <a class="hot-item" href="<?= h($item['url']) ?>" target="_blank" rel="noopener">
+                  <?php
+                    $hotCodigo = '';
+                    $hotFecha = '';
+                    if (preg_match('/codigo=(\d+)/', $item['url'], $cm)) {
+                        $hotCodigo = $cm[1];
+                    }
+                    if (preg_match('/fecha=([^&]+)/', $item['url'], $fm)) {
+                        $hotFecha = urldecode(html_entity_decode($fm[1]));
+                        // El DOF a veces manda año 19xx por error; corregimos a 20xx si aplica
+                        if (preg_match('#^(\d{2}/\d{2}/)19(\d{2})$#', $hotFecha, $yf)) {
+                            $hotFecha = $yf[1] . '20' . $yf[2];
+                        }
+                    }
+                  ?>
+                  <a class="hot-item js-dof-modal"
+                     href="<?= h($item['url']) ?>"
+                     data-codigo="<?= h($hotCodigo) ?>"
+                     data-fecha="<?= h($hotFecha) ?>">
                     <p><?= h($item['title']) ?></p>
                   </a>
                 <?php endforeach; ?>
@@ -962,6 +1284,21 @@ function h(string $s): string
       Contenido obtenido de <a href="<?= h(DOF_URL) ?>" target="_blank" rel="noopener">dof.gob.mx</a>.
       Esta es una lectura alternativa no oficial.
     </footer>
+  </div>
+
+  <div class="modal-root" id="notaModal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-backdrop" data-close-modal></div>
+    <div class="modal-dialog">
+      <div class="modal-top">
+        <div>
+          <p class="modal-kicker">Nota del DOF</p>
+          <h2 class="modal-title" id="modalTitle">Cargando…</h2>
+          <div class="modal-meta" id="modalMeta"></div>
+        </div>
+        <button type="button" class="modal-close" data-close-modal aria-label="Cerrar">×</button>
+      </div>
+      <div class="modal-body loading" id="modalBody">Cargando nota…</div>
+    </div>
   </div>
 
   <script>
@@ -1012,6 +1349,105 @@ function h(string $s): string
             panel.classList.toggle('active', panel.dataset.panel === key);
           });
         });
+      });
+
+      const modal = document.getElementById('notaModal');
+      const modalTitle = document.getElementById('modalTitle');
+      const modalMeta = document.getElementById('modalMeta');
+      const modalBody = document.getElementById('modalBody');
+      const endpoint = <?= json_encode(basename(__FILE__), JSON_UNESCAPED_UNICODE) ?>;
+
+      const openModal = () => {
+        modal.classList.add('open');
+        modal.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('modal-open');
+      };
+
+      const closeModal = () => {
+        modal.classList.remove('open');
+        modal.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('modal-open');
+      };
+
+      const showLoading = (titleHint) => {
+        modalTitle.textContent = titleHint || 'Cargando…';
+        modalMeta.innerHTML = '';
+        modalBody.className = 'modal-body loading';
+        modalBody.textContent = 'Cargando nota…';
+        openModal();
+      };
+
+      const loadNota = async (el) => {
+        const codigo = el.dataset.codigo || '';
+        const fecha = el.dataset.fecha || '';
+        const href = el.getAttribute('href') || '';
+        const hint = (el.querySelector('.note-title, p') || el).textContent.trim();
+
+        showLoading(hint);
+
+        const params = new URLSearchParams({ ajax: 'nota' });
+        if (codigo) {
+          params.set('codigo', codigo);
+          if (fecha) params.set('fecha', fecha);
+        } else {
+          params.set('url', href);
+        }
+
+        try {
+          const res = await fetch(endpoint + '?' + params.toString(), {
+            headers: { 'Accept': 'application/json' },
+          });
+          const data = await res.json();
+          if (!data.ok) {
+            throw new Error(data.error || 'No se pudo cargar la nota');
+          }
+
+          modalTitle.textContent = data.title || hint || 'Nota del DOF';
+          modalMeta.innerHTML = '';
+          if (data.fecha) {
+            const s = document.createElement('span');
+            s.textContent = 'DOF: ' + data.fecha;
+            modalMeta.appendChild(s);
+          }
+          if (data.codigo) {
+            const s = document.createElement('span');
+            s.textContent = 'Código ' + data.codigo;
+            modalMeta.appendChild(s);
+          }
+          if (data.source) {
+            const a = document.createElement('a');
+            a.href = data.source;
+            a.target = '_blank';
+            a.rel = 'noopener';
+            a.textContent = 'Ver en oficial';
+            modalMeta.appendChild(a);
+          }
+
+          modalBody.className = 'modal-body';
+          modalBody.innerHTML = '<div class="modal-content">' + (data.body || '<p>Sin contenido.</p>') + '</div>';
+          modalBody.scrollTop = 0;
+        } catch (err) {
+          modalBody.className = 'modal-body error';
+          modalBody.textContent = err.message || 'Error al cargar la nota';
+        }
+      };
+
+      document.addEventListener('click', (e) => {
+        const link = e.target.closest('.js-dof-modal');
+        if (link) {
+          e.preventDefault();
+          loadNota(link);
+          return;
+        }
+        if (e.target.closest('[data-close-modal]')) {
+          closeModal();
+        }
+      });
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && modal.classList.contains('open')) {
+          closeModal();
+        }
       });
     })();
   </script>
