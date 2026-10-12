@@ -74,20 +74,62 @@ function dof_parse(string $rawHtml): array
     }
 
     $data = [
-        'fecha'       => '',
-        'edicion'     => '',
-        'pdf'         => '',
-        'portada'     => '',
-        'indice_img'  => '',
-        'indicadores' => [],
-        'destacados'  => ['dia' => [], 'semana' => [], 'mes' => []],
-        'secciones'   => [],
-        'accesos'     => [],
+        'fecha'         => '',
+        'edicion'       => '',
+        'edicion_code'  => '',
+        'ediciones_alt' => [],
+        'pdf'           => '',
+        'portada'       => '',
+        'indice_img'    => '',
+        'indicadores'   => [],
+        'destacados'    => ['dia' => [], 'semana' => [], 'mes' => []],
+        'secciones'     => [],
+        'accesos'       => [],
+        'calendario'    => [
+            'year'  => (int) date('Y'),
+            'month' => (int) date('n'),
+            'day'   => (int) date('j'),
+            'dias'  => [],
+        ],
     ];
 
-    if (preg_match('/Fecha:\s*([0-9]{2}\/[0-9]{2}\/[0-9]{4})\s*-\s*Edici[oó]n\s+([^<]+)/iu', $html, $m)) {
+    if (preg_match('/Fecha:\s*([0-9]{2}\/[0-9]{2}\/[0-9]{4})\s*-\s*Edici(?:&oacute;|ó|o)n\s+([^<]+)/iu', $html, $m)) {
         $data['fecha'] = trim($m[1]);
         $data['edicion'] = trim(html_entity_decode($m[2], ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+        if (stripos($data['edicion'], 'vespertina') !== false) {
+            $data['edicion_code'] = 'VES';
+        } elseif (stripos($data['edicion'], 'matutina') !== false) {
+            $data['edicion_code'] = 'MAT';
+        }
+    }
+
+    if (preg_match('/Defaults\((\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*"([^"]*)"/s', $html, $m)) {
+        $days = array_values(array_unique(array_filter(array_map('intval', explode(',', $m[4])))));
+        sort($days);
+        $data['calendario'] = [
+            'year'  => (int) $m[1],
+            'month' => (int) $m[2],
+            'day'   => (int) $m[3],
+            'dias'  => $days,
+        ];
+        if ($data['fecha'] === '') {
+            $data['fecha'] = sprintf('%02d/%02d/%04d', (int) $m[3], (int) $m[2], (int) $m[1]);
+        }
+    }
+
+    if (preg_match_all('/href="[^"]*index\.php\?year=(\d+)&(?:amp;)?month=(\d+)&(?:amp;)?day=(\d+)&(?:amp;)?edicion=(MAT|VES)"[^>]*>\s*(?:<span[^>]*>)?\s*(Edici[oó]n\s+[^<]+)/iu', $html, $em, PREG_SET_ORDER)) {
+        foreach ($em as $row) {
+            $code = strtoupper($row[4]);
+            $label = trim(html_entity_decode(strip_tags($row[5]), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+            $data['ediciones_alt'][$code] = [
+                'code'  => $code,
+                'label' => $label,
+                'year'  => (int) $row[1],
+                'month' => (int) $row[2],
+                'day'   => (int) $row[3],
+            ];
+        }
+        $data['ediciones_alt'] = array_values($data['ediciones_alt']);
     }
 
     if (preg_match("/nota_to_pdf\.php\?fecha=([^&\"']+)&(?:amp;)?edicion=([^&\"']+)/i", $html, $m)) {
@@ -366,7 +408,47 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === 'nota') {
     exit;
 }
 
-[$html, $httpCode, $error] = dof_fetch(DOF_URL);
+function dof_build_url(array $params = []): string
+{
+    $base = basename(__FILE__);
+    $query = http_build_query($params);
+    return $query !== '' ? ($base . '?' . $query) : $base;
+}
+
+function dof_fetch_url_from_request(): string
+{
+    // Formulario "Ir a una fecha exacta" (YYYY-MM-DD)
+    if (!empty($_GET['jump_date']) && preg_match('/^(\d{4})-(\d{2})-(\d{2})$/', (string) $_GET['jump_date'], $jm)) {
+        $params = [
+            'year'  => (int) $jm[1],
+            'month' => (int) $jm[2],
+            'day'   => (int) $jm[3],
+        ];
+        if (!empty($_GET['edicion'])) {
+            $params['edicion'] = strtoupper(preg_replace('/[^A-Z]/i', '', (string) $_GET['edicion']));
+        }
+        header('Location: ' . dof_build_url($params));
+        exit;
+    }
+
+    $year = isset($_GET['year']) ? (int) $_GET['year'] : 0;
+    $month = isset($_GET['month']) ? (int) $_GET['month'] : 0;
+    $day = isset($_GET['day']) ? (int) $_GET['day'] : 0;
+    $edicion = isset($_GET['edicion']) ? strtoupper(preg_replace('/[^A-Z]/i', '', (string) $_GET['edicion'])) : '';
+
+    if ($year >= 1917 && $year <= 2100 && $month >= 1 && $month <= 12 && $day >= 1 && $day <= 31) {
+        $url = DOF_BASE . '/index.php?year=' . $year . '&month=' . $month . '&day=' . $day;
+        if ($edicion === 'MAT' || $edicion === 'VES') {
+            $url .= '&edicion=' . $edicion;
+        }
+        return $url;
+    }
+
+    return DOF_URL;
+}
+
+$fetchUrl = dof_fetch_url_from_request();
+[$html, $httpCode, $error] = dof_fetch($fetchUrl);
 
 if ($html === false || $httpCode >= 400) {
     http_response_code(502);
@@ -384,6 +466,37 @@ if ($html === false || $httpCode >= 400) {
 $dof = dof_parse($html);
 $fechaLabel = $dof['fecha'] !== '' ? $dof['fecha'] : date('d/m/Y');
 $edicionLabel = $dof['edicion'] !== '' ? $dof['edicion'] : 'Edición del día';
+$cal = $dof['calendario'];
+$calYear = (int) $cal['year'];
+$calMonth = (int) $cal['month'];
+$calDay = (int) $cal['day'];
+$calDias = $cal['dias'];
+$hasEjemplar = $dof['fecha'] !== '' && $dof['secciones'] !== [];
+
+$mesesEs = [
+    1 => 'enero', 2 => 'febrero', 3 => 'marzo', 4 => 'abril',
+    5 => 'mayo', 6 => 'junio', 7 => 'julio', 8 => 'agosto',
+    9 => 'septiembre', 10 => 'octubre', 11 => 'noviembre', 12 => 'diciembre',
+];
+$mesNombre = $mesesEs[$calMonth] ?? '';
+
+$prevMonth = $calMonth - 1;
+$prevYear = $calYear;
+if ($prevMonth < 1) {
+    $prevMonth = 12;
+    $prevYear--;
+}
+$nextMonth = $calMonth + 1;
+$nextYear = $calYear;
+if ($nextMonth > 12) {
+    $nextMonth = 1;
+    $nextYear++;
+}
+
+$firstWeekday = (int) date('w', mktime(0, 0, 0, $calMonth, 1, $calYear)); // 0=Dom
+$daysInMonth = (int) date('t', mktime(0, 0, 0, $calMonth, 1, $calYear));
+$todayYmd = date('Y-n-j');
+
 $totalNotas = 0;
 foreach ($dof['secciones'] as $deps) {
     foreach ($deps as $notas) {
@@ -932,6 +1045,202 @@ foreach ($dof['secciones'] as $deps) {
       .wrap { padding: 0 0.85rem; }
     }
 
+    /* Consulta por fecha */
+    .date-panel { overflow: hidden; }
+    .date-panel .panel-head p { max-width: 28rem; }
+    .cal-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      padding: 0.85rem 1rem 0.35rem;
+    }
+    .cal-nav a {
+      width: 2.2rem;
+      height: 2.2rem;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      display: grid;
+      place-items: center;
+      text-decoration: none;
+      background: rgba(255,255,255,0.7);
+      font-weight: 700;
+      color: var(--leaf-deep);
+      transition: background 0.2s ease, transform 0.2s ease;
+    }
+    .cal-nav a:hover { background: #fff; transform: translateY(-1px); }
+    .cal-nav-label {
+      text-align: center;
+      font-family: var(--font-read);
+      font-weight: 700;
+      font-size: 1.05rem;
+      color: var(--leaf-deep);
+      text-transform: capitalize;
+    }
+    .cal-nav-label small {
+      display: block;
+      margin-top: 0.15rem;
+      font-family: var(--font-body);
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--ink-soft);
+      text-transform: none;
+      letter-spacing: 0.04em;
+    }
+    .cal-grid {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 0.35rem;
+      padding: 0.6rem 1rem 0.4rem;
+    }
+    .cal-dow {
+      text-align: center;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--ink-soft);
+      padding: 0.2rem 0 0.35rem;
+    }
+    .cal-day {
+      aspect-ratio: 1;
+      min-height: 2.35rem;
+      border-radius: 12px;
+      border: 1px solid transparent;
+      display: grid;
+      place-items: center;
+      font-weight: 700;
+      font-size: 0.92rem;
+      text-decoration: none;
+      color: var(--ink-soft);
+      background: transparent;
+    }
+    .cal-day.is-empty {
+      opacity: 0.35;
+      font-weight: 500;
+      cursor: default;
+    }
+    .cal-day.has-issue {
+      background: rgba(31, 107, 74, 0.1);
+      border-color: rgba(31, 107, 74, 0.22);
+      color: var(--leaf-deep);
+      transition: transform 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+    }
+    .cal-day.has-issue:hover {
+      transform: translateY(-1px);
+      background: rgba(31, 107, 74, 0.18);
+      box-shadow: 0 8px 18px rgba(15, 61, 44, 0.12);
+    }
+    .cal-day.is-selected {
+      background: linear-gradient(135deg, var(--leaf) 0%, var(--leaf-deep) 100%);
+      color: #f7f3ea;
+      border-color: transparent;
+      box-shadow: 0 10px 22px var(--glow);
+    }
+    .cal-day.is-today:not(.is-selected) {
+      outline: 2px solid rgba(176, 138, 60, 0.55);
+      outline-offset: 1px;
+    }
+    .cal-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem 1rem;
+      padding: 0.35rem 1rem 0.85rem;
+      color: var(--ink-soft);
+      font-size: 0.78rem;
+      font-weight: 600;
+    }
+    .cal-legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .cal-legend i {
+      width: 0.85rem;
+      height: 0.85rem;
+      border-radius: 4px;
+      display: inline-block;
+    }
+    .cal-legend .lg-issue { background: rgba(31, 107, 74, 0.25); border: 1px solid rgba(31, 107, 74, 0.35); }
+    .cal-legend .lg-selected { background: var(--leaf-deep); }
+    .cal-legend .lg-empty { background: rgba(18, 36, 28, 0.08); }
+    .cal-tools {
+      display: flex;
+      flex-direction: column;
+      gap: 0.7rem;
+      padding: 0 1rem 1.1rem;
+      border-top: 1px solid var(--line);
+      padding-top: 0.9rem;
+    }
+    .cal-tools label {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--ink-soft);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .cal-tools-row {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .cal-tools input[type="date"] {
+      flex: 1;
+      min-width: 140px;
+      padding: 0.65rem 0.75rem;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.85);
+      font: inherit;
+      color: var(--ink);
+    }
+    .cal-tools button,
+    .edition-switch a {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.65rem 0.9rem;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.75);
+      color: var(--ink);
+      font: inherit;
+      font-size: 0.86rem;
+      font-weight: 700;
+      text-decoration: none;
+      cursor: pointer;
+      transition: background 0.2s ease, transform 0.2s ease;
+    }
+    .cal-tools button:hover,
+    .edition-switch a:hover { transform: translateY(-1px); background: #fff; }
+    .cal-tools button {
+      background: linear-gradient(135deg, var(--leaf) 0%, var(--leaf-deep) 100%);
+      color: #f7f3ea;
+      border-color: transparent;
+    }
+    .edition-switch {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+    }
+    .edition-switch a.is-active {
+      background: var(--leaf-deep);
+      color: #f7f3ea;
+      border-color: transparent;
+    }
+    .empty-day {
+      padding: 2rem 1.25rem;
+      text-align: center;
+      color: var(--ink-soft);
+    }
+    .empty-day strong {
+      display: block;
+      color: var(--leaf-deep);
+      font-family: var(--font-read);
+      font-size: 1.15rem;
+      margin-bottom: 0.35rem;
+    }
+
     /* Modal de nota */
     .modal-root {
       position: fixed;
@@ -1131,10 +1440,17 @@ foreach ($dof['secciones'] as $deps) {
       <div class="hero-panel">
         <div class="hero-kicker">Diario Oficial de la Federación</div>
         <h1><?= h($fechaLabel) ?></h1>
-        <p>Índice del ejemplar reinterpretado con una lectura más clara: por poder, dependencia y nota, sin el ruido visual del sitio original.</p>
+        <p>
+          <?php if ($hasEjemplar): ?>
+            Estás viendo el ejemplar del <?= h($fechaLabel) ?> (<?= h($edicionLabel) ?>). Usa el calendario para abrir otro día con publicación.
+          <?php else: ?>
+            El <?= h(sprintf('%02d/%02d/%04d', $calDay, $calMonth, $calYear)) ?> no tiene ejemplar. Elige un día marcado en el calendario.
+          <?php endif; ?>
+        </p>
         <div class="hero-meta">
           <span class="chip"><?= h($edicionLabel) ?></span>
           <span class="chip"><?= (int) $totalNotas ?> publicaciones</span>
+          <a class="chip" href="#consulta-fecha">Cambiar de día</a>
           <?php if ($dof['portada'] !== ''): ?>
             <a class="chip" href="<?= h($dof['portada']) ?>" target="_blank" rel="noopener">Ver portada</a>
           <?php endif; ?>
@@ -1209,12 +1525,139 @@ foreach ($dof['secciones'] as $deps) {
               </section>
             <?php endforeach; ?>
           </div>
+        <?php elseif (!$hasEjemplar): ?>
+          <div class="empty-day">
+            <strong>Sin ejemplar este día</strong>
+            El DOF no publicó en la fecha seleccionada.
+            Usa el calendario de la derecha y elige un día con color.
+          </div>
         <?php else: ?>
           <div class="empty">No se pudo estructurar el índice. Revisa el sitio oficial.</div>
         <?php endif; ?>
       </main>
 
       <aside class="side">
+        <section class="panel date-panel" id="consulta-fecha">
+          <div class="panel-head">
+            <div>
+              <h2>Ver un día</h2>
+              <p>Solo los días con color tienen ejemplar publicado. Haz clic para abrirlo.</p>
+            </div>
+          </div>
+
+          <div class="cal-nav">
+            <a href="<?= h(dof_build_url(['year' => $prevYear, 'month' => $prevMonth, 'day' => 1])) ?>" aria-label="Mes anterior">‹</a>
+            <div class="cal-nav-label">
+              <?= h($mesNombre . ' ' . $calYear) ?>
+              <small>Consulta por fecha</small>
+            </div>
+            <a href="<?= h(dof_build_url(['year' => $nextYear, 'month' => $nextMonth, 'day' => 1])) ?>" aria-label="Mes siguiente">›</a>
+          </div>
+
+          <div class="cal-grid" aria-label="Calendario de ejemplares">
+            <?php foreach (['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sá'] as $dow): ?>
+              <div class="cal-dow"><?= h($dow) ?></div>
+            <?php endforeach; ?>
+
+            <?php for ($i = 0; $i < $firstWeekday; $i++): ?>
+              <div class="cal-day is-empty" aria-hidden="true"></div>
+            <?php endfor; ?>
+
+            <?php for ($d = 1; $d <= $daysInMonth; $d++): ?>
+              <?php
+                $hasIssue = in_array($d, $calDias, true);
+                $isSelected = ($d === $calDay);
+                $isToday = ($todayYmd === ($calYear . '-' . $calMonth . '-' . $d));
+                $classes = 'cal-day';
+                if ($hasIssue) {
+                    $classes .= ' has-issue';
+                } else {
+                    $classes .= ' is-empty';
+                }
+                if ($isSelected) {
+                    $classes .= ' is-selected';
+                }
+                if ($isToday) {
+                    $classes .= ' is-today';
+                }
+              ?>
+              <?php if ($hasIssue): ?>
+                <a class="<?= h($classes) ?>"
+                   href="<?= h(dof_build_url(['year' => $calYear, 'month' => $calMonth, 'day' => $d])) ?>"
+                   title="Ver ejemplar del <?= h(sprintf('%02d/%02d/%04d', $d, $calMonth, $calYear)) ?>">
+                  <?= (int) $d ?>
+                </a>
+              <?php else: ?>
+                <span class="<?= h($classes) ?>" title="Sin ejemplar"><?= (int) $d ?></span>
+              <?php endif; ?>
+            <?php endfor; ?>
+          </div>
+
+          <div class="cal-legend">
+            <span><i class="lg-issue"></i> Con ejemplar</span>
+            <span><i class="lg-selected"></i> Día elegido</span>
+            <span><i class="lg-empty"></i> Sin publicación</span>
+          </div>
+
+          <div class="cal-tools">
+            <?php if ($dof['ediciones_alt'] !== [] || $dof['edicion_code'] !== ''): ?>
+              <div>
+                <label>Edición</label>
+                <div class="edition-switch">
+                  <?php
+                    $edicionesShow = $dof['ediciones_alt'];
+                    if ($edicionesShow === [] && $dof['edicion_code'] !== '') {
+                        $edicionesShow[] = [
+                            'code' => $dof['edicion_code'],
+                            'label' => 'Edición ' . $dof['edicion'],
+                            'year' => $calYear,
+                            'month' => $calMonth,
+                            'day' => $calDay,
+                        ];
+                    }
+                    // Asegura mostrar ambas si solo viene una alternativa
+                    $codes = array_column($edicionesShow, 'code');
+                    if ($dof['edicion_code'] !== '' && !in_array($dof['edicion_code'], $codes, true)) {
+                        array_unshift($edicionesShow, [
+                            'code' => $dof['edicion_code'],
+                            'label' => 'Edición ' . $dof['edicion'],
+                            'year' => $calYear,
+                            'month' => $calMonth,
+                            'day' => $calDay,
+                        ]);
+                    }
+                  ?>
+                  <?php foreach ($edicionesShow as $ed): ?>
+                    <a class="<?= $ed['code'] === $dof['edicion_code'] ? 'is-active' : '' ?>"
+                       href="<?= h(dof_build_url([
+                           'year' => $ed['year'],
+                           'month' => $ed['month'],
+                           'day' => $ed['day'],
+                           'edicion' => $ed['code'],
+                       ])) ?>">
+                      <?= h(str_ireplace('Edición ', '', $ed['label'])) ?>
+                    </a>
+                  <?php endforeach; ?>
+                </div>
+              </div>
+            <?php endif; ?>
+
+            <form method="get" action="">
+              <label for="jumpDate">Ir a una fecha exacta</label>
+              <div class="cal-tools-row">
+                <input type="date"
+                       id="jumpDate"
+                       name="jump_date"
+                       min="1917-01-01"
+                       max="<?= h(date('Y-m-d')) ?>"
+                       value="<?= h(sprintf('%04d-%02d-%02d', $calYear, $calMonth, $calDay)) ?>"
+                       required>
+                <button type="submit">Ver ese día</button>
+              </div>
+            </form>
+          </div>
+        </section>
+
         <section class="panel">
           <div class="panel-head">
             <div>
