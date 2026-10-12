@@ -1425,7 +1425,7 @@ foreach ($dof['secciones'] as $deps) {
 <body>
   <div class="wrap">
     <header class="topbar">
-      <a class="brand-mark" href="<?= h(NEW_URL) ?>" target="_blank" rel="noopener">
+      <a class="brand-mark" href="<?= h(NEW_URL) ?>" rel="noopener">
         <strong>DOF</strong>
         <span>versión casa</span>
       </a>
