@@ -8,6 +8,7 @@ declare(strict_types=1);
 
 const DOF_BASE = 'https://dof.gob.mx';
 const DOF_URL  = 'https://dof.gob.mx/';
+const NEW_URL  = 'https://dofversioncasa.com/';
 
 function dof_fetch(string $url): array
 {
@@ -1424,7 +1425,7 @@ foreach ($dof['secciones'] as $deps) {
 <body>
   <div class="wrap">
     <header class="topbar">
-      <a class="brand-mark" href="<?= h(DOF_URL) ?>" target="_blank" rel="noopener">
+      <a class="brand-mark" href="<?= h(NEW_URL) ?>" target="_blank" rel="noopener">
         <strong>DOF</strong>
         <span>versión casa</span>
       </a>
