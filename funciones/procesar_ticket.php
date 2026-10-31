@@ -195,21 +195,14 @@ try {
         registrarUsoContacto((int) $contactoUsado['id'], $contactoUsado, $idTicket);
     }
 
-    // Redirigir al usuario con mensaje de éxito
-    $_SESSION['mensaje'] = [
-        'tipo' => 'success',
-        'texto' => "Ticket #{$idTicket} generado exitosamente"
-    ];
+    // Redirigir al usuario con mensaje de éxito (string: las vistas usan htmlspecialchars)
+    $_SESSION['mensaje'] = "Ticket #{$idTicket} generado exitosamente";
     header("Location: generar_qr.php?id={$idTicket}");
     exit;
 
 } catch (Exception $e) {
-    // Si hubo un error, redirigir con mensaje de error
-    $_SESSION['mensaje'] = [
-        'tipo' => 'error',
-        'texto' => $e->getMessage()
-    ];
-   // header('Location: ../generar-ticket');
+    $_SESSION['error'] = $e->getMessage();
+    header('Location: /generar-ticket');
     exit;
 } finally {
     // Cerrar la conexión

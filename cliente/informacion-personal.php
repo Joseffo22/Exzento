@@ -72,20 +72,30 @@ $datos_fiscales = $stmt_datos->get_result();
     <div class="container py-5">
         <!-- Mensajes de éxito y error -->
         <div id="alertas-perfil">
-        <?php if (isset($_SESSION['mensaje'])): ?>
+        <?php
+        $flashMensaje = $_SESSION['mensaje'] ?? null;
+        unset($_SESSION['mensaje']);
+        if (is_array($flashMensaje)) {
+            $flashMensaje = (string) ($flashMensaje['texto'] ?? '');
+        }
+        $flashError = $_SESSION['error'] ?? null;
+        unset($_SESSION['error']);
+        if (is_array($flashError)) {
+            $flashError = (string) ($flashError['texto'] ?? '');
+        }
+        ?>
+        <?php if (is_string($flashMensaje) && $flashMensaje !== ''): ?>
             <div class="alert alert-success alert-dismissible fade show" role="alert">
-                <i class="bi bi-check-circle"></i> <?= htmlspecialchars($_SESSION['mensaje']) ?>
+                <i class="bi bi-check-circle"></i> <?= htmlspecialchars($flashMensaje) ?>
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
-            <?php unset($_SESSION['mensaje']); ?>
         <?php endif; ?>
 
-        <?php if (isset($_SESSION['error'])): ?>
+        <?php if (is_string($flashError) && $flashError !== ''): ?>
             <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <i class="bi bi-exclamation-triangle"></i> <?= htmlspecialchars($_SESSION['error']) ?>
+                <i class="bi bi-exclamation-triangle"></i> <?= htmlspecialchars($flashError) ?>
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
-            <?php unset($_SESSION['error']); ?>
         <?php endif; ?>
         </div>
 

@@ -115,8 +115,32 @@ $conn->close();
 <link href="/assets/css/datos-facturacion.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
 
+<?php
+$flashMensaje = $_SESSION['mensaje'] ?? null;
+unset($_SESSION['mensaje']);
+if (is_array($flashMensaje)) {
+    $flashMensaje = (string) ($flashMensaje['texto'] ?? '');
+}
+$flashError = $_SESSION['error'] ?? null;
+unset($_SESSION['error']);
+if (is_array($flashError)) {
+    $flashError = (string) ($flashError['texto'] ?? '');
+}
+?>
 <div class="df-page">
     <div class="container py-4 pb-5">
+        <?php if (is_string($flashMensaje) && $flashMensaje !== ''): ?>
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <?= htmlspecialchars($flashMensaje) ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <?php endif; ?>
+        <?php if (is_string($flashError) && $flashError !== ''): ?>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <?= htmlspecialchars($flashError) ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <?php endif; ?>
         <div class="row justify-content-center">
             <div class="col-lg-8 col-md-10">
                 <div class="card df-card shadow-sm mb-4">

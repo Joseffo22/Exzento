@@ -260,19 +260,31 @@ if (!function_exists('tickets_url_filtros')) {
         </a>
     </header>
 
-    <?php if (isset($_SESSION['mensaje'])): ?>
+    <?php
+    $flashMensaje = $_SESSION['mensaje'] ?? null;
+    unset($_SESSION['mensaje']);
+    if (is_array($flashMensaje)) {
+        $flashMensaje = (string) ($flashMensaje['texto'] ?? '');
+    }
+    $flashError = $_SESSION['error'] ?? null;
+    unset($_SESSION['error']);
+    if (is_array($flashError)) {
+        $flashError = (string) ($flashError['texto'] ?? '');
+    }
+    ?>
+    <?php if (is_string($flashMensaje) && $flashMensaje !== ''): ?>
     <div class="alert alert-success alert-dismissible fade show" role="alert">
-        <?= htmlspecialchars($_SESSION['mensaje']) ?>
+        <?= htmlspecialchars($flashMensaje) ?>
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
-    <?php unset($_SESSION['mensaje']); endif; ?>
+    <?php endif; ?>
 
-    <?php if (isset($_SESSION['error'])): ?>
+    <?php if (is_string($flashError) && $flashError !== ''): ?>
     <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        <?= htmlspecialchars($_SESSION['error']) ?>
+        <?= htmlspecialchars($flashError) ?>
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
-    <?php unset($_SESSION['error']); endif; ?>
+    <?php endif; ?>
 
     <form class="tickets-filters" method="GET" action="/lista-tickets" id="ticketsFiltros">
         <input type="hidden" name="filtro" value="<?= htmlspecialchars($filtro) ?>">

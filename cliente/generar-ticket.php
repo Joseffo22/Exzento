@@ -15,6 +15,20 @@ $result_metodos_pago =  $conn->query($query_metodos_pago);
 <div class="container py-4 ticket-form-page">
     <div class="row justify-content-center">
         <div class="col-lg-8 col-md-10">
+            <?php
+            $flashError = $_SESSION['error'] ?? null;
+            unset($_SESSION['error']);
+            if (is_array($flashError)) {
+                $flashError = (string) ($flashError['texto'] ?? '');
+            }
+            if (is_string($flashError) && $flashError !== ''):
+            ?>
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <?= htmlspecialchars($flashError) ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            <?php endif; ?>
+
             <div class="ticket-form-header">
                 <h1>Generar ticket de facturación</h1>
                 <p>Completa los 4 pasos para solicitar tu factura.</p>
