@@ -1,13 +1,26 @@
 <?php
 
 // index.php
+$uri = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
+$uri = trim((string) $uri, '/');
+
+// Subidas de constancia: procesar ANTES de imprimir HTML (header.php)
+if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
+    if ($uri === 'editar-datos-fiscales') {
+        require __DIR__ . '/funciones/actualizar_datos_fiscales.php';
+        exit;
+    }
+    if ($uri === 'registrar-datos-fiscales') {
+        require __DIR__ . '/funciones/procesar_datos_fiscales.php';
+        exit;
+    }
+}
+
 require('header.php');
 require('verificacion.php');
 
 require('route.php');
 require($ruta.'/nav.php');
-$uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-$uri = trim($uri, '/');
 
 switch ($uri) {
     case '':

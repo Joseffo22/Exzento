@@ -94,8 +94,9 @@ $usos = $conn->query($query_usos);
                             <?php unset($_SESSION['mensaje']); ?>
                         <?php endif; ?>
 
-                        <form action="/funciones/actualizar_datos_fiscales.php" method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
-                            <input type="hidden" name="id_datos" value="<?= $datos['id'] ?>">
+                        <form action="/editar-datos-fiscales?id=<?= (int) $datos['id'] ?>" method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
+                            <input type="hidden" name="id_datos" value="<?= (int) $datos['id'] ?>">
+                            <input type="hidden" name="MAX_FILE_SIZE" value="8388608">
                             
                             <!-- Datos Básicos -->
                             <div class="mb-4">
@@ -217,8 +218,8 @@ $usos = $conn->query($query_usos);
                                             </div>
                                         <?php endif; ?>
                                         <label for="constancia" class="form-label">Nueva Constancia (PDF) - Opcional</label>
-                                        <input type="file" class="form-control" id="constancia" name="constancia" accept=".pdf">
-                                        <div class="form-text">Suba una nueva constancia solo si desea reemplazar la actual</div>
+                                        <input type="file" class="form-control" id="constancia" name="constancia" accept="application/pdf,.pdf">
+                                        <div class="form-text">PDF máximo 8MB. Debe terminar en .pdf. Si falla, el error aparecerá arriba en rojo.</div>
                                     </div>
                                 </div>
                             </div>

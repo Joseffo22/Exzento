@@ -33,7 +33,8 @@ $usos = $conn->query($query_usos);
                             <?php unset($_SESSION['error']); ?>
                         <?php endif; ?>
 
-                        <form action="/funciones/procesar_datos_fiscales.php" method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
+                        <form action="/registrar-datos-fiscales" method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
+                            <input type="hidden" name="MAX_FILE_SIZE" value="8388608">
                             <!-- Datos Básicos -->
                             <div class="mb-4">
                                 <h5 class="border-bottom pb-2">Datos Básicos</h5>
