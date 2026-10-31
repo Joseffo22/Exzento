@@ -33,16 +33,14 @@ function procesarImagen($archivo) {
         throw new Exception('La imagen excede el tamaño máximo de 5MB.');
     }
 
-    // Crear directorio si no existe
-    $directorio = __DIR__ . '/../archivos/tickets/';
-    if (!file_exists($directorio)) {
-        mkdir($directorio, 0777, true);
-    }
+    // public_html/archivos/tickets
+    require_once __DIR__ . '/../assets/php/config.php';
+    $directorio = exzento_archivos_ensure_dir('tickets');
 
     // Generar nombre único para el archivo
     $extension = pathinfo($archivo['name'], PATHINFO_EXTENSION);
     $nombreArchivo = uniqid('ticket_') . '.' . $extension;
-    $rutaCompleta = $directorio . $nombreArchivo;
+    $rutaCompleta = $directorio . DIRECTORY_SEPARATOR . $nombreArchivo;
 
     // Mover el archivo
     if (!move_uploaded_file($archivo['tmp_name'], $rutaCompleta)) {
@@ -59,15 +57,13 @@ function procesarFotoCamara($datosBase64) {
         return null;
     }
 
-    // Crear directorio si no existe
-    $directorio = __DIR__ . '/../archivos/fotos_tickets/';
-    if (!file_exists($directorio)) {
-        mkdir($directorio, 0777, true);
-    }
+    // public_html/archivos/fotos_tickets
+    require_once __DIR__ . '/../assets/php/config.php';
+    $directorio = exzento_archivos_ensure_dir('fotos_tickets');
 
     // Generar nombre único para el archivo
     $nombreArchivo = uniqid('foto_ticket_') . '.jpg';
-    $rutaCompleta = $directorio . $nombreArchivo;
+    $rutaCompleta = $directorio . DIRECTORY_SEPARATOR . $nombreArchivo;
 
     // Decodificar y guardar la imagen
     $datosImagen = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $datosBase64));

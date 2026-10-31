@@ -83,12 +83,8 @@ try {
 
     if ($huboNuevaConstancia) {
         $ruta_constancia = exzento_guardar_constancia($_FILES['constancia'], $id_usuario);
-
-        if ($constancia_actual !== '') {
-            $rutaAnterior = __DIR__ . '/../' . ltrim(str_replace(['..\\', '../'], '', $constancia_actual), '/');
-            if (is_file($rutaAnterior)) {
-                @unlink($rutaAnterior);
-            }
+        if ($constancia_actual !== '' && $constancia_actual !== $ruta_constancia) {
+            exzento_eliminar_constancia_fs($constancia_actual);
         }
     }
 

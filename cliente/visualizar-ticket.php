@@ -72,7 +72,7 @@ $constancia=$datos['constancia'];
 $archivoQR = site_url("archivos/qrs/qr_$id_ticket.png");
 $urlTicket = site_url("visualizar-ticket?id=$id_ticket");
 $urlQR = site_url("archivos/qrs/qr_$id_ticket.png");
-$urlConstancia = $constancia ? site_url($constancia) : '';
+$urlConstancia = $constancia ? exzento_url_archivo($constancia) : '';
 
 // Datos de facturación
 $datosFacturacion = [

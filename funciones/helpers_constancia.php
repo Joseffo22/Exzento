@@ -1,5 +1,7 @@
 <?php
 
+require_once __DIR__ . '/../assets/php/config.php';
+
 function exzento_mensaje_error_subida(int $codigo): string
 {
     switch ($codigo) {
@@ -56,14 +58,14 @@ function exzento_archivo_parece_pdf(string $tmpPath, string $clientMime = ''): b
         'application/pdf',
         'application/x-pdf',
         'application/acrobat',
-        'application/octet-stream', // algunos PDF del SAT llegan así
+        'application/octet-stream',
     ];
 
     return in_array($mime, $allowed, true);
 }
 
 /**
- * Guarda la constancia PDF y devuelve la ruta relativa para BD.
+ * Guarda la constancia en public_html/archivos/constancias y devuelve ruta web para BD.
  *
  * @param array $file Elemento de $_FILES['constancia']
  */
@@ -94,35 +96,13 @@ function exzento_guardar_constancia(array $file, int $idUsuario): string
         throw new Exception('El archivo no parece un PDF válido');
     }
 
-    $uploadDir = realpath(__DIR__ . '/../archivos');
-    if ($uploadDir === false) {
-        $baseArchivos = __DIR__ . '/../archivos';
-        if (!is_dir($baseArchivos) && !mkdir($baseArchivos, 0755, true) && !is_dir($baseArchivos)) {
-            throw new Exception('No se pudo crear la carpeta archivos/');
-        }
-        $uploadDir = realpath($baseArchivos);
-        if ($uploadDir === false) {
-            throw new Exception('No se pudo resolver la carpeta archivos/');
-        }
-    }
-
-    $constanciasDir = $uploadDir . DIRECTORY_SEPARATOR . 'constancias';
-    if (!is_dir($constanciasDir) && !mkdir($constanciasDir, 0755, true) && !is_dir($constanciasDir)) {
-        throw new Exception('No se pudo crear archivos/constancias/. Revisa permisos en el servidor.');
-    }
-
-    if (!is_writable($constanciasDir)) {
-        @chmod($constanciasDir, 0755);
-    }
-    if (!is_writable($constanciasDir)) {
-        throw new Exception('La carpeta archivos/constancias/ no tiene permiso de escritura en el servidor.');
-    }
+    // Siempre dentro de DOCUMENT_ROOT/archivos/constancias (= public_html/archivos/...)
+    $constanciasDir = exzento_archivos_ensure_dir('constancias');
 
     $nombre = 'constancia_' . $idUsuario . '_' . date('YmdHis') . '_' . bin2hex(random_bytes(4)) . '.pdf';
     $destino = $constanciasDir . DIRECTORY_SEPARATOR . $nombre;
 
     if (!move_uploaded_file($file['tmp_name'], $destino)) {
-        // Fallback por si el hosting altera el tmp
         if (!@copy($file['tmp_name'], $destino)) {
             $last = error_get_last();
             $detalle = $last['message'] ?? 'sin detalle';
@@ -134,10 +114,22 @@ function exzento_guardar_constancia(array $file, int $idUsuario): string
     @chmod($destino, 0644);
 
     if (!is_file($destino) || filesize($destino) <= 0) {
-        throw new Exception('El archivo no quedó guardado en archivos/constancias/');
+        throw new Exception('El archivo no quedó guardado en public_html/archivos/constancias/');
     }
 
     return 'archivos/constancias/' . $nombre;
+}
+
+function exzento_eliminar_constancia_fs(?string $rutaBd): void
+{
+    $publico = exzento_ruta_publica_archivo($rutaBd);
+    if ($publico === '') {
+        return;
+    }
+    $abs = exzento_archivos_fs($publico);
+    if (is_file($abs)) {
+        @unlink($abs);
+    }
 }
 
 function exzento_detectar_fallo_post_upload(): void

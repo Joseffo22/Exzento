@@ -53,14 +53,15 @@ try {
 
     $conn->commit();
 
+    require_once __DIR__ . '/../assets/php/config.php';
     $archivos = [
-        __DIR__ . '/../../archivos/tickets/' . ($ticket['imagen_ticket'] ?? ''),
-        __DIR__ . '/../../archivos/fotos_tickets/' . ($ticket['foto_ticket'] ?? ''),
-        __DIR__ . '/../../archivos/qrs/qr_' . $id_ticket . '.png',
+        !empty($ticket['imagen_ticket']) ? exzento_archivos_fs('tickets/' . $ticket['imagen_ticket']) : '',
+        !empty($ticket['foto_ticket']) ? exzento_archivos_fs('fotos_tickets/' . $ticket['foto_ticket']) : '',
+        exzento_archivos_fs('qrs/qr_' . $id_ticket . '.png'),
     ];
 
     foreach ($archivos as $ruta) {
-        if ($ruta && is_file($ruta)) {
+        if ($ruta !== '' && is_file($ruta)) {
             @unlink($ruta);
         }
     }

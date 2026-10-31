@@ -38,15 +38,13 @@ if (!empty($errores)) {
     die(implode(' ', $errores));
 }
 
-$carpeta = __DIR__ . '/../archivos/facturas/';
-if (!is_dir($carpeta)) {
-    mkdir($carpeta, 0755, true);
-}
+require_once __DIR__ . '/../assets/php/config.php';
+$carpeta = exzento_archivos_ensure_dir('facturas');
 
 $nombre_pdf = uniqid('pdf_') . '.pdf';
 $nombre_xml = uniqid('xml_') . '.xml';
-$ruta_pdf = $carpeta . $nombre_pdf;
-$ruta_xml = $carpeta . $nombre_xml;
+$ruta_pdf = $carpeta . DIRECTORY_SEPARATOR . $nombre_pdf;
+$ruta_xml = $carpeta . DIRECTORY_SEPARATOR . $nombre_xml;
 
 if (!move_uploaded_file($pdf['tmp_name'], $ruta_pdf) || !move_uploaded_file($xml['tmp_name'], $ruta_xml)) {
     die('Error al guardar los archivos.');

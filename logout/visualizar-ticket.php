@@ -50,7 +50,7 @@ if (!empty($datos['estado_factura']) && $datos['estado_factura'] === 'facturada'
 }
 
 $constancia = $datos['constancia'] ?? '';
-$urlConstancia = $constancia ? site_url($constancia) : '';
+$urlConstancia = $constancia ? exzento_url_archivo($constancia) : '';
 $tieneTicket = !empty($datos['imagen_ticket']) || !empty($datos['foto_ticket']);
 $rutaTicket = !empty($datos['imagen_ticket'])
     ? site_url('archivos/tickets/' . $datos['imagen_ticket'])

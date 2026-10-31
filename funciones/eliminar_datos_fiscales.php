@@ -1,6 +1,7 @@
 <?php
 session_start();
 require('../assets/php/conexiones/conexionMySqli.php');
+require_once __DIR__ . '/helpers_constancia.php';
 header('Content-Type: application/json');
 
 // Verificar si el usuario está logueado
@@ -33,10 +34,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $datos = $resultado->fetch_assoc();
         $ruta_constancia = $datos['constancia'];
 
-        // Eliminar el archivo de constancia si existe
-        if ($ruta_constancia && file_exists('../' . $ruta_constancia)) {
-            unlink('../' . $ruta_constancia);
-        }
+        // Eliminar el archivo dentro de public_html/archivos (no usar ../ fuera del docroot)
+        exzento_eliminar_constancia_fs($ruta_constancia);
 
         // Eliminar el registro de la base de datos
         $query_eliminar = "DELETE FROM datosFiscales WHERE id = ? AND id_usuario = ?";
