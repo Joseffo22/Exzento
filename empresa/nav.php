@@ -25,7 +25,7 @@
           <a class="nav-link" href="lector-qr">Lector QR</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="funciones/logout.php">Cerrar Sesión</a>
+          <a class="nav-link" href="/funciones/logout.php">Cerrar Sesión</a>
         </li>
       </ul>
     </div>

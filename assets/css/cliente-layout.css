@@ -13,12 +13,50 @@ body.cliente-app {
 .cliente-header .container {
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: space-between;
+    gap: 0.75rem;
 }
 
 .cliente-header .navbar-logo {
     height: 26px;
     width: auto;
+}
+
+.cliente-logout {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: rgba(255, 255, 255, 0.88) !important;
+    text-decoration: none !important;
+    font-size: 0.8rem;
+    font-weight: 600;
+    white-space: nowrap;
+    padding: 0.35rem 0.65rem;
+    border-radius: 0.4rem;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.cliente-logout:hover,
+.cliente-logout:focus {
+    color: #fff !important;
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.35);
+    text-decoration: none !important;
+}
+
+.cliente-logout i {
+    font-size: 0.9rem;
+}
+
+@media (max-width: 400px) {
+    .cliente-logout span {
+        display: none;
+    }
+
+    .cliente-logout {
+        padding: 0.4rem 0.55rem;
+    }
 }
 
 .cliente-bottom-nav {

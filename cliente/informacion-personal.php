@@ -205,6 +205,22 @@ $datos_fiscales = $stmt_datos->get_result();
                 </div>
             </div>
         </div>
+
+        <div class="row mt-4 mb-2">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3">
+                        <div>
+                            <h5 class="mb-1">Sesión</h5>
+                            <p class="text-muted mb-0 small">Cierra tu sesión en este dispositivo cuando termines.</p>
+                        </div>
+                        <a href="/funciones/logout.php" class="btn btn-outline-danger">
+                            <i class="bi bi-box-arrow-right"></i> Cerrar sesión
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Modal para ver detalles -->

@@ -23,11 +23,11 @@ h1, h2, h3, h4, h5, h6,
 /* General styles (from header.php) */
 
 /* Enlaces de texto — excluir botones, CTAs y tabs */
-a:not(.btn):not(.nav-link):not(.landing-btn):not(.btn-exzento-nav):not(.whatsapp-btn):not(.dashboard-cta):not(.dashboard-view-all):not(.dashboard-quick-card):not(.dashboard-activity-link):not(.dashboard-metric):not(.cliente-tab):not(.df-btn-whatsapp):not(.comercio-btn-primary):not(.ticket-photo-btn):not(.resumen-stat):not(.resumen-btn-reenviar):not(.resumen-pendiente-title):not(.facturas-chip):not(.tickets-chip):not(.tickets-btn-nuevo) {
+a:not(.btn):not(.nav-link):not(.landing-btn):not(.btn-exzento-nav):not(.whatsapp-btn):not(.dashboard-cta):not(.dashboard-view-all):not(.dashboard-quick-card):not(.dashboard-activity-link):not(.dashboard-metric):not(.cliente-tab):not(.cliente-logout):not(.df-btn-whatsapp):not(.comercio-btn-primary):not(.ticket-photo-btn):not(.resumen-stat):not(.resumen-btn-reenviar):not(.resumen-pendiente-title):not(.facturas-chip):not(.tickets-chip):not(.tickets-btn-nuevo) {
     color: var(--bs-primary) !important;
     transition: all 0.3s ease;
 }
-a:not(.btn):not(.nav-link):not(.landing-btn):not(.btn-exzento-nav):not(.whatsapp-btn):not(.dashboard-cta):not(.dashboard-view-all):not(.dashboard-quick-card):not(.dashboard-activity-link):not(.dashboard-metric):not(.cliente-tab):not(.df-btn-whatsapp):not(.comercio-btn-primary):not(.ticket-photo-btn):not(.resumen-stat):not(.resumen-btn-reenviar):not(.resumen-pendiente-title):not(.facturas-chip):not(.tickets-chip):not(.tickets-btn-nuevo):hover {
+a:not(.btn):not(.nav-link):not(.landing-btn):not(.btn-exzento-nav):not(.whatsapp-btn):not(.dashboard-cta):not(.dashboard-view-all):not(.dashboard-quick-card):not(.dashboard-activity-link):not(.dashboard-metric):not(.cliente-tab):not(.cliente-logout):not(.df-btn-whatsapp):not(.comercio-btn-primary):not(.ticket-photo-btn):not(.resumen-stat):not(.resumen-btn-reenviar):not(.resumen-pendiente-title):not(.facturas-chip):not(.tickets-chip):not(.tickets-btn-nuevo):hover {
     color: var(--bs-primary-dark) !important;
 }
 
