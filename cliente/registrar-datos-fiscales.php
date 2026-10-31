@@ -25,7 +25,15 @@ $usos = $conn->query($query_usos);
                         <h3 class="mb-0">Registro de Datos Fiscales</h3>
                     </div>
                     <div class="card-body">
-                        <form action="../funciones/procesar_datos_fiscales.php" method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
+                        <?php if (!empty($_SESSION['error'])): ?>
+                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                <?= htmlspecialchars(is_array($_SESSION['error']) ? (string) ($_SESSION['error']['texto'] ?? '') : (string) $_SESSION['error']) ?>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                            <?php unset($_SESSION['error']); ?>
+                        <?php endif; ?>
+
+                        <form action="/funciones/procesar_datos_fiscales.php" method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
                             <!-- Datos Básicos -->
                             <div class="mb-4">
                                 <h5 class="border-bottom pb-2">Datos Básicos</h5>

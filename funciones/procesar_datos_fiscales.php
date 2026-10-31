@@ -1,182 +1,165 @@
 <?php
-require_once('../assets/php/conexiones/conexionMySqli.php');
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+require_once __DIR__ . '/../assets/php/conexiones/conexionMySqli.php';
 
-// Debug de sesión
-echo "<!-- Debug Sesión: ";
-print_r($_SESSION);
-echo " -->\n";
-
-// Verificar si el usuario está logueado
 if (!isset($_SESSION['id_usuario'])) {
-    die("Error: No hay sesión de usuario activa");
+    header('Location: /login');
+    exit();
 }
 
-// Debug de POST
-echo "<!-- Debug POST: ";
-print_r($_POST);
-echo " -->\n";
-
-// Debug de FILES
-echo "<!-- Debug FILES: ";
-print_r($_FILES);
-echo " -->\n";
-
-// Verificar si es una petición POST
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    die("Error: Método no permitido");
+    header('Location: /registrar-datos-fiscales');
+    exit();
 }
 
-// Función para validar y procesar el archivo de constancia
-function procesarConstancia($archivo, $id_usuario) {
-    // Debug de archivo
-    echo "<!-- Debug Archivo: ";
-    print_r($archivo);
-    echo " -->\n";
+function mensajeErrorSubidaRegistro(int $codigo): string
+{
+    return match ($codigo) {
+        UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE => 'El archivo supera el tamaño máximo permitido',
+        UPLOAD_ERR_PARTIAL => 'El archivo se subió parcialmente. Intenta de nuevo',
+        UPLOAD_ERR_NO_FILE => 'Por favor suba su constancia de situación fiscal',
+        UPLOAD_ERR_NO_TMP_DIR => 'Falta la carpeta temporal del servidor',
+        UPLOAD_ERR_CANT_WRITE => 'No se pudo escribir el archivo en el servidor',
+        UPLOAD_ERR_EXTENSION => 'Una extensión de PHP bloqueó la subida',
+        default => 'Error al subir el archivo (código ' . $codigo . ')',
+    };
+}
 
-    // Verificar si se subió un archivo
-    if (!isset($archivo['constancia']) || $archivo['constancia']['error'] !== UPLOAD_ERR_OK) {
+function procesarConstanciaRegistro(array $archivo, int $id_usuario): string
+{
+    if (!isset($archivo['constancia'])) {
         throw new Exception('Por favor suba su constancia de situación fiscal');
     }
 
     $file = $archivo['constancia'];
-    
-    // Debug de tipo de archivo
-    echo "<!-- Debug Tipo de archivo: " . $file['type'] . " -->\n";
-    
-    // Validar tipo de archivo
-    $allowed_types = ['application/pdf'];
-    if (!in_array($file['type'], $allowed_types)) {
-        throw new Exception('Solo se permiten archivos PDF');
+    if (($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
+        throw new Exception(mensajeErrorSubidaRegistro((int) $file['error']));
     }
 
-    // Validar tamaño (máximo 5MB)
-    if ($file['size'] > 5 * 1024 * 1024) {
+    if (($file['size'] ?? 0) > 5 * 1024 * 1024) {
         throw new Exception('El archivo es demasiado grande. Máximo 5MB');
     }
 
-    // Crear directorio si no existe
     $upload_dir = __DIR__ . '/../archivos/constancias/';
-    if (!file_exists($upload_dir)) {
-        if (!mkdir($upload_dir, 0777, true)) {
-            throw new Exception('Error al crear el directorio de constancias');
-        }
+    if (!is_dir($upload_dir) && !mkdir($upload_dir, 0755, true) && !is_dir($upload_dir)) {
+        throw new Exception('Error al crear el directorio de constancias');
     }
 
-    // Generar nombre único para el archivo
-    $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
-    $nombre_archivo = 'constancia_' . $id_usuario . '_' . time() . '.' . $extension;
+    $mime_type = null;
+    if (function_exists('finfo_open')) {
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        if ($finfo) {
+            $mime_type = finfo_file($finfo, $file['tmp_name']);
+            finfo_close($finfo);
+        }
+    }
+    if (!$mime_type && function_exists('mime_content_type')) {
+        $mime_type = mime_content_type($file['tmp_name']);
+    }
+    if (!$mime_type) {
+        $mime_type = $file['type'] ?? '';
+    }
+
+    $extension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+    $allowed_mimes = ['application/pdf', 'application/x-pdf', 'application/acrobat'];
+    if ($extension !== 'pdf' || !in_array($mime_type, $allowed_mimes, true)) {
+        throw new Exception('Solo se permiten archivos PDF');
+    }
+
+    $nombre_archivo = 'constancia_' . $id_usuario . '_' . time() . '.pdf';
     $ruta_completa = $upload_dir . $nombre_archivo;
 
-    // Debug de ruta
-    echo "<!-- Debug Ruta archivo: " . $ruta_completa . " -->\n";
-
-    // Mover el archivo
-    if (!move_uploaded_file($file['tmp_name'], $ruta_completa)) {
-        throw new Exception('Error al guardar el archivo: ' . error_get_last()['message']);
+    if (!is_uploaded_file($file['tmp_name']) || !move_uploaded_file($file['tmp_name'], $ruta_completa)) {
+        throw new Exception('Error al guardar el archivo en el servidor');
     }
 
     return 'archivos/constancias/' . $nombre_archivo;
 }
 
 try {
-    // Debug de conexión
     if (!$conn) {
-        throw new Exception("Error de conexión: " . mysqli_connect_error());
+        throw new Exception('Error de conexión a la base de datos');
     }
 
-    // Validar campos requeridos
-    $campos_requeridos = ['razonSocial', 'rfc', 'regimen', 'uso_cfdi', 'correo', 'telefono', 
-                         'calle', 'colonia', 'codigoPostal', 'municipio', 'estado'];
-    
+    $campos_requeridos = [
+        'razonSocial', 'rfc', 'regimen', 'uso_cfdi', 'correo', 'telefono',
+        'calle', 'colonia', 'codigoPostal', 'municipio', 'estado',
+    ];
+
     foreach ($campos_requeridos as $campo) {
-        if (empty($_POST[$campo])) {
+        if (!isset($_POST[$campo]) || trim((string) $_POST[$campo]) === '') {
             throw new Exception("El campo {$campo} es requerido");
         }
     }
 
-    // Debug de campos validados
-    echo "<!-- Debug Campos validados correctamente -->\n";
+    $id_usuario = (int) $_SESSION['id_usuario'];
+    $razonSocial = trim($_POST['razonSocial']);
+    $rfc = strtoupper(trim($_POST['rfc']));
+    $regimen = (int) $_POST['regimen'];
+    $uso_cfdi = (int) $_POST['uso_cfdi'];
+    $correo = trim($_POST['correo']);
+    $telefono = trim($_POST['telefono']);
+    $calle = trim($_POST['calle']);
+    $colonia = trim($_POST['colonia']);
+    $codigoPostal = trim($_POST['codigoPostal']);
+    $municipio = trim($_POST['municipio']);
+    $estado = trim($_POST['estado']);
 
-    // Validar RFC
-    if (!preg_match('/^[A-ZÑ&]{3,4}[0-9]{6}[A-Z0-9]{3}$/', $_POST['rfc'])) {
+    if (!preg_match('/^[A-ZÑ&]{3,4}[0-9]{6}[A-Z0-9]{3}$/u', $rfc)) {
         throw new Exception('RFC inválido');
     }
-
-    // Validar correo
-    if (!filter_var($_POST['correo'], FILTER_VALIDATE_EMAIL)) {
+    if (!filter_var($correo, FILTER_VALIDATE_EMAIL)) {
         throw new Exception('Correo electrónico inválido');
     }
-
-    // Validar código postal
-    if (!preg_match('/^[0-9]{5}$/', $_POST['codigoPostal'])) {
+    if (!preg_match('/^[0-9]{5}$/', $codigoPostal)) {
         throw new Exception('Código postal inválido');
     }
-
-    // Procesar constancia
-    $ruta_constancia = procesarConstancia($_FILES, $_SESSION['id_usuario']);
-
-    // Debug de ruta constancia
-    echo "<!-- Debug Ruta constancia: " . $ruta_constancia . " -->\n";
-
-    // Preparar la consulta SQL para inserción
-    $query = "INSERT INTO datosFiscales (id_usuario, razonSocial, rfc, regimen, usoFavorito, 
-              correo, telefono, calle, colonia, codigoPostal, municipio, estado, constancia) 
-              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-    
-    // Debug de query
-    echo "<!-- Debug Query: " . $query . " -->\n";
-    
-    $stmt = $conn->prepare($query);
-    if (!$stmt) {
-        throw new Exception("Error en la preparación de la consulta: " . $conn->error);
+    if ($regimen <= 0 || $uso_cfdi <= 0) {
+        throw new Exception('Selecciona régimen fiscal y uso de CFDI válidos');
     }
 
-    $stmt->bind_param("isssissssssss", 
-        $_SESSION['id_usuario'], $_POST['razonSocial'], $_POST['rfc'], $_POST['regimen'], 
-        $_POST['uso_cfdi'], $_POST['correo'], $_POST['telefono'], $_POST['calle'], 
-        $_POST['colonia'], $_POST['codigoPostal'], $_POST['municipio'], $_POST['estado'],
+    $ruta_constancia = procesarConstanciaRegistro($_FILES, $id_usuario);
+
+    $query = 'INSERT INTO datosFiscales (
+                id_usuario, razonSocial, rfc, regimen, usoFavorito,
+                correo, telefono, calle, colonia, codigoPostal, municipio, estado, constancia
+              ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+
+    $stmt = $conn->prepare($query);
+    if (!$stmt) {
+        throw new Exception('Error en la preparación de la consulta: ' . $conn->error);
+    }
+
+    // i s s i i s s s s s s s s
+    $stmt->bind_param(
+        'issiissssssss',
+        $id_usuario,
+        $razonSocial,
+        $rfc,
+        $regimen,
+        $uso_cfdi,
+        $correo,
+        $telefono,
+        $calle,
+        $colonia,
+        $codigoPostal,
+        $municipio,
+        $estado,
         $ruta_constancia
     );
 
-    // Debug de parámetros
-    echo "<!-- Debug Parámetros: ";
-    echo "id_usuario: " . $_SESSION['id_usuario'] . ", ";
-    echo "razonSocial: " . $_POST['razonSocial'] . ", ";
-    echo "rfc: " . $_POST['rfc'] . ", ";
-    echo "regimen: " . $_POST['regimen'] . ", ";
-    echo "uso_cfdi: " . $_POST['uso_cfdi'] . ", ";
-    echo "correo: " . $_POST['correo'] . ", ";
-    echo "telefono: " . $_POST['telefono'] . ", ";
-    echo "calle: " . $_POST['calle'] . ", ";
-    echo "colonia: " . $_POST['colonia'] . ", ";
-    echo "codigoPostal: " . $_POST['codigoPostal'] . ", ";
-    echo "municipio: " . $_POST['municipio'] . ", ";
-    echo "estado: " . $_POST['estado'] . ", ";
-    echo "constancia: " . $ruta_constancia;
-    echo " -->\n";
-
-    // Ejecutar la consulta
     if (!$stmt->execute()) {
-        throw new Exception("Error al guardar los datos: " . $stmt->error);
+        throw new Exception('Error al guardar los datos: ' . $stmt->error);
     }
 
-    // Debug de inserción exitosa
-    echo "<!-- Debug: Inserción exitosa -->\n";
-
-    // Redirigir con mensaje de éxito
-    $_SESSION['mensaje'] = "Datos fiscales registrados correctamente";
-    header('Location: ../index');
+    $stmt->close();
+    $_SESSION['mensaje'] = 'Datos fiscales registrados correctamente';
+    header('Location: /informacion-personal');
     exit();
-
 } catch (Exception $e) {
-    // Debug de error
-    echo "<!-- Debug Error: " . $e->getMessage() . " -->\n";
-    echo "<!-- Debug Error Trace: " . $e->getTraceAsString() . " -->\n";
-    
-    // Guardar error en sesión y redirigir
     $_SESSION['error'] = $e->getMessage();
-    header('Location: ../registrar-datos-fiscales');
+    header('Location: /registrar-datos-fiscales');
     exit();
 }
-?> 

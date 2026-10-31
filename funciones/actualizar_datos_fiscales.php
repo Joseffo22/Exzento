@@ -1,57 +1,96 @@
 <?php
-require('../assets/php/conexiones/conexionMySqli.php');
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+require_once __DIR__ . '/../assets/php/conexiones/conexionMySqli.php';
 
-// Verificar si el usuario está logueado
 if (!isset($_SESSION['id_usuario'])) {
-    header('Location: ../login.php');
+    header('Location: /login');
     exit();
 }
 
-function procesarConstancia($file, $id_usuario) {
-    if ($file['constancia']['error'] !== UPLOAD_ERR_OK) {
-        throw new Exception('Error al subir el archivo: ' . $file['constancia']['error']);
+function mensajeErrorSubida(int $codigo): string
+{
+    return match ($codigo) {
+        UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE => 'El archivo supera el tamaño máximo permitido',
+        UPLOAD_ERR_PARTIAL => 'El archivo se subió parcialmente. Intenta de nuevo',
+        UPLOAD_ERR_NO_FILE => 'No se seleccionó ningún archivo',
+        UPLOAD_ERR_NO_TMP_DIR => 'Falta la carpeta temporal del servidor',
+        UPLOAD_ERR_CANT_WRITE => 'No se pudo escribir el archivo en el servidor',
+        UPLOAD_ERR_EXTENSION => 'Una extensión de PHP bloqueó la subida',
+        default => 'Error al subir el archivo (código ' . $codigo . ')',
+    };
+}
+
+function procesarConstancia(array $files, int $id_usuario): string
+{
+    if (!isset($files['constancia'])) {
+        throw new Exception('No se recibió el archivo de constancia');
+    }
+
+    $file = $files['constancia'];
+    if (($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
+        throw new Exception(mensajeErrorSubida((int) $file['error']));
+    }
+
+    if (($file['size'] ?? 0) > 5 * 1024 * 1024) {
+        throw new Exception('El archivo es demasiado grande. Máximo 5MB');
     }
 
     $upload_dir = __DIR__ . '/../archivos/constancias/';
-    if (!is_dir($upload_dir)) {
-        mkdir($upload_dir, 0755, true);
+    if (!is_dir($upload_dir) && !mkdir($upload_dir, 0755, true) && !is_dir($upload_dir)) {
+        throw new Exception('Error al crear el directorio de constancias');
     }
 
-    // Validar tipo de archivo
-    $allowed_types = ['application/pdf'];
-    $finfo = finfo_open(FILEINFO_MIME_TYPE);
-    $mime_type = finfo_file($finfo, $file['constancia']['tmp_name']);
-    finfo_close($finfo);
+    $mime_type = null;
+    if (function_exists('finfo_open')) {
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        if ($finfo) {
+            $mime_type = finfo_file($finfo, $file['tmp_name']);
+            finfo_close($finfo);
+        }
+    }
+    if (!$mime_type && function_exists('mime_content_type')) {
+        $mime_type = mime_content_type($file['tmp_name']);
+    }
+    if (!$mime_type) {
+        $mime_type = $file['type'] ?? '';
+    }
 
-    if (!in_array($mime_type, $allowed_types)) {
+    $extension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+    $allowed_mimes = ['application/pdf', 'application/x-pdf', 'application/acrobat'];
+    if ($extension !== 'pdf' || !in_array($mime_type, $allowed_mimes, true)) {
         throw new Exception('Solo se permiten archivos PDF');
     }
 
-    // Generar nombre único para el archivo
-    $extension = pathinfo($file['constancia']['name'], PATHINFO_EXTENSION);
-    $nombre_archivo = 'constancia_' . $id_usuario . '_' . time() . '.' . $extension;
+    $nombre_archivo = 'constancia_' . $id_usuario . '_' . time() . '.pdf';
     $ruta_completa = $upload_dir . $nombre_archivo;
 
-    // Mover el archivo
-    if (!move_uploaded_file($file['constancia']['tmp_name'], $ruta_completa)) {
-        throw new Exception('Error al guardar el archivo');
+    if (!is_uploaded_file($file['tmp_name']) || !move_uploaded_file($file['tmp_name'], $ruta_completa)) {
+        throw new Exception('Error al guardar el archivo en el servidor');
     }
 
     return 'archivos/constancias/' . $nombre_archivo;
 }
 
 try {
-    $id_usuario = $_SESSION['id_usuario'];
-    $id_datos = $_POST['id_datos'] ?? null;
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        throw new Exception('Método no permitido');
+    }
 
-    if (!$id_datos) {
+    $id_usuario = (int) $_SESSION['id_usuario'];
+    $id_datos = isset($_POST['id_datos']) ? (int) $_POST['id_datos'] : 0;
+
+    if ($id_datos <= 0) {
         throw new Exception('ID de datos fiscales no proporcionado');
     }
 
-    // Verificar que los datos fiscales pertenezcan al usuario
-    $query_verificar = "SELECT id, constancia FROM datosFiscales WHERE id = ? AND id_usuario = ?";
+    $query_verificar = 'SELECT id, constancia FROM datosFiscales WHERE id = ? AND id_usuario = ?';
     $stmt_verificar = $conn->prepare($query_verificar);
-    $stmt_verificar->bind_param("ii", $id_datos, $id_usuario);
+    if (!$stmt_verificar) {
+        throw new Exception('Error al verificar datos fiscales: ' . $conn->error);
+    }
+    $stmt_verificar->bind_param('ii', $id_datos, $id_usuario);
     $stmt_verificar->execute();
     $resultado = $stmt_verificar->get_result();
 
@@ -60,80 +99,113 @@ try {
     }
 
     $datos_actuales = $resultado->fetch_assoc();
-    $constancia_actual = $datos_actuales['constancia'];
+    $constancia_actual = $datos_actuales['constancia'] ?? '';
+    $stmt_verificar->close();
 
-    // Validar campos requeridos
-    $campos_requeridos = ['razonSocial', 'rfc', 'regimen', 'uso_cfdi', 'correo', 'telefono', 
-                         'calle', 'colonia', 'codigoPostal', 'municipio', 'estado'];
-    
+    $campos_requeridos = [
+        'razonSocial', 'rfc', 'regimen', 'uso_cfdi', 'correo', 'telefono',
+        'calle', 'colonia', 'codigoPostal', 'municipio', 'estado',
+    ];
+
     foreach ($campos_requeridos as $campo) {
-        if (empty($_POST[$campo])) {
+        if (!isset($_POST[$campo]) || trim((string) $_POST[$campo]) === '') {
             throw new Exception("El campo {$campo} es requerido");
         }
     }
 
-    // Validar RFC
-    if (!preg_match('/^[A-ZÑ&]{3,4}[0-9]{6}[A-Z0-9]{3}$/', $_POST['rfc'])) {
+    $razonSocial = trim($_POST['razonSocial']);
+    $rfc = strtoupper(trim($_POST['rfc']));
+    $regimen = (int) $_POST['regimen'];
+    $uso_cfdi = (int) $_POST['uso_cfdi'];
+    $correo = trim($_POST['correo']);
+    $telefono = trim($_POST['telefono']);
+    $calle = trim($_POST['calle']);
+    $colonia = trim($_POST['colonia']);
+    $codigoPostal = trim($_POST['codigoPostal']);
+    $municipio = trim($_POST['municipio']);
+    $estado = trim($_POST['estado']);
+
+    if (!preg_match('/^[A-ZÑ&]{3,4}[0-9]{6}[A-Z0-9]{3}$/u', $rfc)) {
         throw new Exception('RFC inválido');
     }
-
-    // Validar correo
-    if (!filter_var($_POST['correo'], FILTER_VALIDATE_EMAIL)) {
+    if (!filter_var($correo, FILTER_VALIDATE_EMAIL)) {
         throw new Exception('Correo electrónico inválido');
     }
-
-    // Validar código postal
-    if (!preg_match('/^[0-9]{5}$/', $_POST['codigoPostal'])) {
+    if (!preg_match('/^[0-9]{5}$/', $codigoPostal)) {
         throw new Exception('Código postal inválido');
     }
+    if ($regimen <= 0 || $uso_cfdi <= 0) {
+        throw new Exception('Selecciona régimen fiscal y uso de CFDI válidos');
+    }
 
-    // Procesar nueva constancia si se subió
-    $ruta_constancia = $constancia_actual; // Mantener la actual por defecto
-    if (isset($_FILES['constancia']) && $_FILES['constancia']['error'] !== UPLOAD_ERR_NO_FILE) {
+    $ruta_constancia = $constancia_actual;
+    $huboNuevaConstancia = isset($_FILES['constancia'])
+        && is_array($_FILES['constancia'])
+        && ($_FILES['constancia']['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE;
+
+    if ($huboNuevaConstancia) {
         $ruta_constancia = procesarConstancia($_FILES, $id_usuario);
-        
-        // Eliminar constancia anterior si existe
-        if ($constancia_actual && file_exists('../' . $constancia_actual)) {
-            unlink('../' . $constancia_actual);
+
+        if ($constancia_actual) {
+            $rutaAnterior = __DIR__ . '/../' . ltrim($constancia_actual, '/');
+            if (is_file($rutaAnterior)) {
+                @unlink($rutaAnterior);
+            }
         }
     }
 
-    // Preparar la consulta SQL para actualización
-    $query = "UPDATE datosFiscales SET 
-              razonSocial = ?, rfc = ?, regimen = ?, usoFavorito = ?, 
-              correo = ?, telefono = ?, calle = ?, colonia = ?, codigoPostal = ?, 
-              municipio = ?, estado = ?, constancia = ? 
-              WHERE id = ? AND id_usuario = ?";
-    
+    $query = 'UPDATE datosFiscales SET
+              razonSocial = ?, rfc = ?, regimen = ?, usoFavorito = ?,
+              correo = ?, telefono = ?, calle = ?, colonia = ?, codigoPostal = ?,
+              municipio = ?, estado = ?, constancia = ?
+              WHERE id = ? AND id_usuario = ?';
+
     $stmt = $conn->prepare($query);
     if (!$stmt) {
-        throw new Exception("Error en la preparación de la consulta: " . $conn->error);
+        throw new Exception('Error en la preparación de la consulta: ' . $conn->error);
     }
 
-    $stmt->bind_param("sssiisssssssii", 
-        $_POST['razonSocial'], $_POST['rfc'], $_POST['regimen'], $_POST['uso_cfdi'], 
-        $_POST['correo'], $_POST['telefono'], $_POST['calle'], $_POST['colonia'], 
-        $_POST['codigoPostal'], $_POST['municipio'], $_POST['estado'], $ruta_constancia,
-        $id_datos, $id_usuario
+    // s s i i s s s s s s s s i i
+    $stmt->bind_param(
+        'ssiissssssssii',
+        $razonSocial,
+        $rfc,
+        $regimen,
+        $uso_cfdi,
+        $correo,
+        $telefono,
+        $calle,
+        $colonia,
+        $codigoPostal,
+        $municipio,
+        $estado,
+        $ruta_constancia,
+        $id_datos,
+        $id_usuario
     );
 
-    // Ejecutar la consulta
     if (!$stmt->execute()) {
-        throw new Exception("Error al actualizar los datos: " . $stmt->error);
+        throw new Exception('Error al actualizar los datos: ' . $stmt->error);
     }
 
-    if ($stmt->affected_rows > 0) {
-        $_SESSION['mensaje'] = "Datos fiscales actualizados correctamente";
+    if ($stmt->affected_rows > 0 || $huboNuevaConstancia) {
+        $_SESSION['mensaje'] = $huboNuevaConstancia
+            ? 'Datos fiscales y constancia actualizados correctamente'
+            : 'Datos fiscales actualizados correctamente';
     } else {
-        $_SESSION['mensaje'] = "No se realizaron cambios en los datos fiscales";
+        $_SESSION['mensaje'] = 'No se realizaron cambios en los datos fiscales';
     }
 
-    header('Location: ../cliente/informacion-personal.php');
+    $stmt->close();
+    header('Location: /informacion-personal');
     exit();
-
 } catch (Exception $e) {
     $_SESSION['error'] = $e->getMessage();
-    header('Location: ../cliente/informacion-personal.php');
+    $idRedirect = isset($_POST['id_datos']) ? (int) $_POST['id_datos'] : 0;
+    if ($idRedirect > 0) {
+        header('Location: /editar-datos-fiscales?id=' . $idRedirect);
+    } else {
+        header('Location: /informacion-personal');
+    }
     exit();
 }
-?> 

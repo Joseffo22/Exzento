@@ -77,7 +77,24 @@ $usos = $conn->query($query_usos);
                         <h3 class="mb-0"><i class="bi bi-pencil-square"></i> Editar Datos Fiscales</h3>
                     </div>
                     <div class="card-body">
-                        <form action="../funciones/actualizar_datos_fiscales.php" method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
+                        <?php if (!empty($_SESSION['error'])): ?>
+                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                <i class="bi bi-exclamation-triangle"></i>
+                                <?= htmlspecialchars(is_array($_SESSION['error']) ? (string) ($_SESSION['error']['texto'] ?? '') : (string) $_SESSION['error']) ?>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                            <?php unset($_SESSION['error']); ?>
+                        <?php endif; ?>
+                        <?php if (!empty($_SESSION['mensaje'])): ?>
+                            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                <i class="bi bi-check-circle"></i>
+                                <?= htmlspecialchars(is_array($_SESSION['mensaje']) ? (string) ($_SESSION['mensaje']['texto'] ?? '') : (string) $_SESSION['mensaje']) ?>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                            <?php unset($_SESSION['mensaje']); ?>
+                        <?php endif; ?>
+
+                        <form action="/funciones/actualizar_datos_fiscales.php" method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
                             <input type="hidden" name="id_datos" value="<?= $datos['id'] ?>">
                             
                             <!-- Datos Básicos -->
